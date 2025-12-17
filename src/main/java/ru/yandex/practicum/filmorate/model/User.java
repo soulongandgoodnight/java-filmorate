@@ -10,12 +10,12 @@ public class User {
     @NotNull(groups = Marker.OnUpdate.class)
     private Long id;
 
-    @Email(groups = Marker.OnCreate.class, message = "Электронная почта должна быть валидной (содержать @)")
-    @NotBlank(groups = Marker.OnCreate.class, message = "Электронная почта не может быть пустой")
+    @Email(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Электронная почта должна быть валидной (содержать @)")
+    @NotBlank(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Электронная почта не может быть пустой")
     private String email;
 
-    @NotBlank(groups = Marker.OnCreate.class, message = "Логин не может быть пустым")
-    @Pattern(regexp = "^\\S*$", groups = Marker.OnCreate.class, message = "Логин не может содержать пробелы")
+    @NotBlank(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Логин не может быть пустым")
+    @Pattern(regexp = "^\\S*$", groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Логин не может содержать пробелы")
     private String login;
 
     private String name;

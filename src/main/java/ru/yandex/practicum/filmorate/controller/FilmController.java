@@ -37,8 +37,8 @@ public class FilmController {
     @PutMapping
     @Validated(Marker.OnUpdate.class)
     public Film update(@Validated(Marker.OnUpdate.class) @RequestBody Film film) {
-        if (film.getId() == null || !films.containsKey(film.getId())) {
-            String message = "Фильм с ID " + (film.getId() != null ? film.getId() : "[не указан]") + " не найден";
+        if (!films.containsKey(film.getId())) {
+            String message = "Фильм с ID " + film.getId() + " не найден";
             log.error("Ошибка: {}", message);
             throw new ValidationException(message);
         }
