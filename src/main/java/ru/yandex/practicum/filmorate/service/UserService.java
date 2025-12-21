@@ -23,8 +23,6 @@ public class UserService {
         User friend = getById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
-        userStorage.update(user);
-        userStorage.update(friend);
     }
 
     public void removeFriend(Long userId, Long friendId) {
@@ -32,8 +30,6 @@ public class UserService {
         User friend = getById(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
-        userStorage.update(user);
-        userStorage.update(friend);
     }
 
 

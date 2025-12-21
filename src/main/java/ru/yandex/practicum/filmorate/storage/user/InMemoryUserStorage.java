@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -23,7 +22,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     @Validated(Marker.OnCreate.class)
     public User create(User user) {
-        validateUser(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -38,7 +36,6 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("Пользователь с ID " + user.getId() + " не найден");
         }
-        validateUser(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -63,11 +60,4 @@ public class InMemoryUserStorage implements UserStorage {
     public Collection<User> findAll() {
         return users.values();
     }
-
-    private void validateUser(User user) {
-        if (user.getBirthday() == null) {
-            throw new ValidationException("Дата рождения не может быть null");
-        }
-    }
-
 }
