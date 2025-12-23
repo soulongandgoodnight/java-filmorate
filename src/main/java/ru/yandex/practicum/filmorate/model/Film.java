@@ -6,20 +6,25 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
     @NotNull(groups = Marker.OnUpdate.class)
     private Long id;
 
-    @NotBlank(groups = Marker.OnCreate.class, message = "Название не может быть пустым")
+    @NotBlank(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Название не может быть пустым")
     private String name;
 
-    @Size(max = 200, groups = Marker.OnCreate.class, message = "Описание не может быть длиннее 200 символов")
+    @Size(max = 200, groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Описание не может быть длиннее 200 символов")
     private String description;
 
+    @NotNull(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Дата релиза не может быть null")
     private LocalDate releaseDate;
 
-    @Positive(groups = Marker.OnCreate.class, message = "Продолжительность должна быть положительным числом")
+    @Positive(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Продолжительность должна быть положительным числом")
     private Integer duration;
+
+    private Set<Long> likes = new HashSet<>();
 }
