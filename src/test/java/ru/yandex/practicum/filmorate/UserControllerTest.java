@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -16,10 +17,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,6 +35,7 @@ public class UserControllerTest {
     private UserService userService;
 
     @Autowired
+    @Qualifier("userDbStorage")
     private UserStorage userStorage;
 
     @BeforeEach
@@ -51,7 +52,7 @@ public class UserControllerTest {
         validUser.setEmail("user@yandex.ru");
         validUser.setLogin("user1234");
         validUser.setName("Lexa");
-        validUser.setBirthday(LocalDate.of(2000,1,1));
+        validUser.setBirthday(LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -141,7 +142,7 @@ public class UserControllerTest {
         validUser.setEmail("user@yandex.ru");
         validUser.setLogin("user1234");
         validUser.setName("");
-        validUser.setBirthday(LocalDate.of(2000,1,1));
+        validUser.setBirthday(LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -156,7 +157,7 @@ public class UserControllerTest {
         validUser.setEmail("user@yandex.ru");
         validUser.setLogin("user1234");
         validUser.setName(null);
-        validUser.setBirthday(LocalDate.of(2000,1,1));
+        validUser.setBirthday(LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,7 +194,7 @@ public class UserControllerTest {
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setName("Lexa");
-        user.setBirthday(LocalDate.of(2000,1,1));
+        user.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser = userService.create(user);
         Long id = savedUser.getId();
 
@@ -236,7 +237,7 @@ public class UserControllerTest {
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setName("Lexa");
-        user.setBirthday(LocalDate.of(2000,1,1));
+        user.setBirthday(LocalDate.of(2000, 1, 1));
         userService.create(user);
 
         mockMvc.perform(get("/users"))
@@ -252,7 +253,7 @@ public class UserControllerTest {
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser1 = userService.create(user1);
 
         User user2 = new User();
@@ -265,8 +266,8 @@ public class UserControllerTest {
         mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
 
-        assert savedUser1.getFriends().contains(savedUser2.getId());
-        assert savedUser2.getFriends().contains(savedUser1.getId());
+        assert savedUser1.getRelations().containsKey(savedUser2.getId());
+        assert savedUser2.getRelations().containsKey(savedUser1.getId());
     }
 
     @Test
@@ -288,7 +289,7 @@ public class UserControllerTest {
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser1 = userService.create(user1);
 
         mockMvc.perform(get("/users/{id}/friends", savedUser1.getId()))
@@ -324,7 +325,7 @@ public class UserControllerTest {
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser1 = userService.create(user1);
 
         User user2 = new User();
@@ -340,8 +341,8 @@ public class UserControllerTest {
         mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
 
-        assert !userService.getById(savedUser1.getId()).getFriends().contains(savedUser2.getId());
-        assert !userService.getById(savedUser2.getId()).getFriends().contains(savedUser1.getId());
+        assert !userService.getById(savedUser1.getId()).getRelations().containsKey(savedUser2.getId());
+        assert !userService.getById(savedUser2.getId()).getRelations().containsKey(savedUser1.getId());
     }
 
     @Test
@@ -350,7 +351,7 @@ public class UserControllerTest {
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser1 = userService.create(user1);
 
         User user2 = new User();
@@ -363,8 +364,8 @@ public class UserControllerTest {
         mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
 
-        assert userService.getById(savedUser1.getId()).getFriends().isEmpty();
-        assert userService.getById(savedUser2.getId()).getFriends().isEmpty();
+        assert userService.getById(savedUser1.getId()).getRelations().isEmpty();
+        assert userService.getById(savedUser2.getId()).getRelations().isEmpty();
     }
 
     @Test
@@ -386,7 +387,7 @@ public class UserControllerTest {
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser1 = userService.create(user1);
 
         mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), 999L))
@@ -399,7 +400,7 @@ public class UserControllerTest {
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser1 = userService.create(user1);
 
         User user2 = new User();
@@ -413,7 +414,7 @@ public class UserControllerTest {
         user3.setEmail("user3@yandex.ru");
         user3.setLogin("user9101");
         user3.setName("Kartoxa");
-        user3.setBirthday(LocalDate.of(1989,5,5));
+        user3.setBirthday(LocalDate.of(1989, 5, 5));
         User savedUser3 = userService.create(user3);
 
         mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser3.getId()))

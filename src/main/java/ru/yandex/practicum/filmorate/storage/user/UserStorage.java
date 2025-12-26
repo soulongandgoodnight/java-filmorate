@@ -13,5 +13,7 @@ public interface UserStorage {
 
     User getById(Long id);
 
+    Collection<User> getByIds(Collection<Long> ids);
+
     Collection<User> findAll();
 }

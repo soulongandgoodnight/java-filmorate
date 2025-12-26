@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -20,10 +21,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,9 +42,11 @@ public class FilmControllerTest {
     private FilmService filmService;
 
     @Autowired
+    @Qualifier("filmDbStorage")
     private FilmStorage filmStorage;
 
     @Autowired
+    @Qualifier("userDbStorage")
     private UserStorage userStorage;
 
     @BeforeEach
@@ -65,7 +67,7 @@ public class FilmControllerTest {
         Film validFilm = new Film();
         validFilm.setName("film");
         validFilm.setDescription("description");
-        validFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        validFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         validFilm.setDuration(70);
 
         mockMvc.perform(post("/films")
@@ -85,7 +87,7 @@ public class FilmControllerTest {
         Film notValidFilm = new Film();
         notValidFilm.setName("");
         notValidFilm.setDescription("description");
-        notValidFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        notValidFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         notValidFilm.setDuration(70);
 
         mockMvc.perform(post("/films")
@@ -99,7 +101,7 @@ public class FilmControllerTest {
         Film notValidFilm = new Film();
         notValidFilm.setName(null);
         notValidFilm.setDescription("description");
-        notValidFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        notValidFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         notValidFilm.setDuration(70);
 
         mockMvc.perform(post("/films")
@@ -113,7 +115,7 @@ public class FilmControllerTest {
         Film notValidFilm = new Film();
         notValidFilm.setName("film");
         notValidFilm.setDescription("7".repeat(201));
-        notValidFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        notValidFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         notValidFilm.setDuration(70);
 
         mockMvc.perform(post("/films")
@@ -127,7 +129,7 @@ public class FilmControllerTest {
         Film notValidFilm = new Film();
         notValidFilm.setName("film");
         notValidFilm.setDescription("description");
-        notValidFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        notValidFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         notValidFilm.setDuration(0);
 
         mockMvc.perform(post("/films")
@@ -141,7 +143,7 @@ public class FilmControllerTest {
         Film notValidFilm = new Film();
         notValidFilm.setName("film");
         notValidFilm.setDescription("description");
-        notValidFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        notValidFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         notValidFilm.setDuration(-1);
 
         mockMvc.perform(post("/films")
@@ -164,7 +166,7 @@ public class FilmControllerTest {
         Film createdFilm = new Film();
         createdFilm.setName("film1");
         createdFilm.setDescription("description1");
-        createdFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        createdFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         createdFilm.setDuration(70);
         Film savedFilm = filmService.create(createdFilm);
         Long id = savedFilm.getId();
@@ -173,7 +175,7 @@ public class FilmControllerTest {
         updateFilm.setId(id);
         updateFilm.setName("film2");
         updateFilm.setDescription("description2");
-        updateFilm.setReleaseDate(LocalDate.of(2008,8,8));
+        updateFilm.setReleaseDate(LocalDate.of(2008, 8, 8));
         updateFilm.setDuration(80);
 
         mockMvc.perform(put("/films")
@@ -193,7 +195,7 @@ public class FilmControllerTest {
         updateFilm.setId(999L);
         updateFilm.setName("film2");
         updateFilm.setDescription("description2");
-        updateFilm.setReleaseDate(LocalDate.of(2008,8,8));
+        updateFilm.setReleaseDate(LocalDate.of(2008, 8, 8));
         updateFilm.setDuration(80);
 
         mockMvc.perform(put("/films")
@@ -207,7 +209,7 @@ public class FilmControllerTest {
         Film validFilm = new Film();
         validFilm.setName("film");
         validFilm.setDescription("description");
-        validFilm.setReleaseDate(LocalDate.of(2007,7,7));
+        validFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         validFilm.setDuration(70);
         filmService.create(validFilm);
 
@@ -224,21 +226,21 @@ public class FilmControllerTest {
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setName("Lexa");
-        user.setBirthday(LocalDate.of(2000,1,1));
+        user.setBirthday(LocalDate.of(2000, 1, 1));
         User savedUser = userService.create(user);
         Long userId = savedUser.getId();
 
         Film film1 = new Film();
         film1.setName("film1");
         film1.setDescription("description1");
-        film1.setReleaseDate(LocalDate.of(2007,7,7));
+        film1.setReleaseDate(LocalDate.of(2007, 7, 7));
         film1.setDuration(70);
         Film savedFilm1 = filmService.create(film1);
 
         Film film2 = new Film();
         film2.setName("film2");
         film2.setDescription("description2");
-        film2.setReleaseDate(LocalDate.of(2008,8,8));
+        film2.setReleaseDate(LocalDate.of(2008, 8, 8));
         film2.setDuration(80);
         Film savedFilm2 = filmService.create(film2);
 

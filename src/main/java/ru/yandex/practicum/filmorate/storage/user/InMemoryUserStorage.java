@@ -57,6 +57,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public Collection<User> getByIds(Collection<Long> ids) {
+        var result = new HashMap<Long, User>();
+        for (var id : ids) {
+            if (!result.containsKey(id)) {
+                result.put(id, getById(id));
+            }
+        }
+        return result.values();
+    }
+
+    @Override
     public Collection<User> findAll() {
         return users.values();
     }
