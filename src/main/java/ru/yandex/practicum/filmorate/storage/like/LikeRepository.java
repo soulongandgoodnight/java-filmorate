@@ -11,24 +11,27 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class LikeRepository {
     private static final String ADD_LIKE_QUERY =
-            "INSERT INTO PUBLIC.\"likes\" (\"film_id\", \"user_id\") " +
-                    "VALUES(?, ?) " +
-                    "ON CONFLICT DO NOTHING;";
+            "MERGE INTO PUBLIC.LIKES AS T " +
+                    "USING (VALUES (?, ?)) AS S(FILM_ID, USER_ID) " +
+                    "ON T.FILM_ID = S.FILM_ID AND T.USER_ID = S.USER_ID " +
+                    "WHEN NOT MATCHED THEN " +
+                    "INSERT VALUES(S.FILM_ID, S.USER_ID)";
+
 
     private static final String REMOVE_LIKE_QUERY =
-            "DELETE FROM PUBLIC.\"likes\" VALUES " +
-                    "WHERE \"film_id\" = ? AND \"user_id\" = ?;";
+            "DELETE FROM PUBLIC.LIKES  " +
+                    "WHERE FILM_ID = ? AND USER_ID = ?;";
 
     private static final String GET_LIKES_BY_FILM_QUERY =
-            "SELECT \"user_id\" " +
-                    "FROM PUBLIC.\"likes\" " +
-                    "WHERE \"film_id\" = ?;";
+            "SELECT USER_ID " +
+                    "FROM PUBLIC.LIKES " +
+                    "WHERE FILM_ID = ?;";
 
     private static final String GET_MOST_LIKED_FILMS_QUERY =
-            "SELECT \"film_id\"\n" +
-                    "FROM PUBLIC.\"likes\"\n" +
-                    "GROUP BY \"film_id\"\n" +
-                    "ORDER BY count(\"film_id\") DESC LIMIT ?";
+            "SELECT FILM_ID " +
+                    "FROM PUBLIC.LIKES " +
+                    "GROUP BY FILM_ID " +
+                    "ORDER BY count(FILM_ID) DESC LIMIT ?";
 
     private final JdbcTemplate jdbc;
 
@@ -41,8 +44,7 @@ public class LikeRepository {
     }
 
     public List<Long> getLikesByFilm(long filmId) {
-        var result = jdbc.queryForList(GET_LIKES_BY_FILM_QUERY, Long.class, filmId);
-        return result;
+        return jdbc.queryForList(GET_LIKES_BY_FILM_QUERY, Long.class, filmId);
     }
 
     public List<Long> getMostLikedFilms(long maxCount) {
@@ -50,7 +52,6 @@ public class LikeRepository {
             return List.of();
         }
 
-        var result = jdbc.queryForList(GET_MOST_LIKED_FILMS_QUERY, Long.class, maxCount);
-        return result;
+        return jdbc.queryForList(GET_MOST_LIKED_FILMS_QUERY, Long.class, maxCount);
     }
 }
