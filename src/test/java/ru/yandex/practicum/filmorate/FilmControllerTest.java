@@ -41,22 +41,22 @@ public class FilmControllerTest {
     private FilmService filmService;
 
     @Autowired
-    private FilmRepository filmStorage;
+    private FilmRepository filmRepository;
 
     @Autowired
-    private UserRepository userStorage;
+    private UserRepository userRepository;
 
     @BeforeEach
     void clearData() {
         List<Long> filmIds = filmService.findAll().stream()
                 .map(Film::getId)
                 .collect(Collectors.toList());
-        filmIds.forEach(filmStorage::delete);
+        filmIds.forEach(filmRepository::delete);
 
         List<Long> userIds = userService.findAll().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
-        userIds.forEach(userStorage::delete);
+        userIds.forEach(userRepository::delete);
     }
 
     @Test
