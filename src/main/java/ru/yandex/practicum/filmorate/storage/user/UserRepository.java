@@ -17,34 +17,34 @@ public class UserRepository extends BaseRepository<User> {
     }
 
     private static final String CREATE_QUERY =
-            "INSERT INTO PUBLIC.\"users\" (\"email\", \"name\", \"login\", \"birthday\")" +
+            "INSERT INTO PUBLIC.USERS (EMAIL, NAME, LOGIN, BIRTHDAY)" +
                     "VALUES (?, ?, ?, ?) ;";
 
     private static final String UPDATE_QUERY =
-            "UPDATE PUBLIC.\"users\" SET " +
-                    "\"email\" = ?," +
-                    "\"name\" = ?," +
-                    "\"login\" = ?," +
-                    "\"birthday\" = ? " +
-                    "WHERE \"id\" = ?";
+            "UPDATE PUBLIC.USERS SET " +
+                    "EMAIL = ?," +
+                    "NAME = ?," +
+                    "LOGIN = ?," +
+                    "BIRTHDAY = ? " +
+                    "WHERE ID = ?";
 
     private static final String DELETE_QUERY =
-            "DELETE FROM PUBLIC.\"users\" " +
-                    "WHERE \"id\" = ?;";
+            "DELETE FROM PUBLIC.USERS " +
+                    "WHERE ID = ?;";
 
     private static final String GET_BY_ID_QUERY =
-            "SELECT \"id\", \"email\", \"name\", \"login\", \"birthday\" " +
-                    "FROM PUBLIC.\"users\" " +
-                    "WHERE \"id\" = ?";
+            "SELECT ID, EMAIL, NAME, LOGIN, BIRTHDAY " +
+                    "FROM PUBLIC.USERS " +
+                    "WHERE ID = ?";
 
     private static final String GET_BY_MANY_IDS_QUERY =
-            "SELECT \"id\", \"email\", \"name\", \"login\", \"birthday\" " +
-                    "FROM PUBLIC.\"users\" " +
-                    "WHERE \"id\" in (%s)";
+            "SELECT ID, EMAIL, NAME, LOGIN, BIRTHDAY " +
+                    "FROM PUBLIC.USERS " +
+                    "WHERE ID IN (%s)";
 
     private static final String FIND_ALL_QUERY =
-            "SELECT \"id\", \"email\", \"login\", \"name\", \"birthday\" " +
-                    "FROM PUBLIC.\"users\"";
+            "SELECT ID, EMAIL, LOGIN, NAME, BIRTHDAY " +
+                    "FROM PUBLIC.USERS";
 
     public User create(User user) {
         var id = insert(CREATE_QUERY, user.getEmail(), user.getName(), user.getLogin(), user.getBirthday());

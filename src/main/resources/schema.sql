@@ -1,59 +1,59 @@
-CREATE TABLE IF NOT EXISTS "users" (
-  "id" bigserial PRIMARY KEY,
-  "email" varchar,
-  "login" varchar,
-  "name" varchar,
-  "birthday" date
+CREATE TABLE IF NOT EXISTS USERS (
+  ID bigserial PRIMARY KEY,
+  EMAIL varchar,
+  LOGIN varchar,
+  NAME varchar,
+  BIRTHDAY date
 );
 
-CREATE TABLE IF NOT EXISTS "friendships" (
-  "following_user_id" bigint,
-  "followed_user_id" bigint,
-  "is_friendship_confirmed" bool,
-  PRIMARY KEY ("following_user_id", "followed_user_id")
+CREATE TABLE IF NOT EXISTS RELATIONS (
+  FOLLOWING_USER_ID bigint,
+  FOLLOWED_USER_ID bigint,
+  IS_FRIENDSHIP_CONFIRMED bool,
+  PRIMARY KEY (FOLLOWING_USER_ID, FOLLOWED_USER_ID)
 );
 
-CREATE TABLE IF NOT EXISTS "films" (
-  "id" bigserial PRIMARY KEY,
-  "name" varchar,
-  "description" varchar,
-  "release_date" date,
-  "duration" int,
-  "rating_id" int
+CREATE TABLE IF NOT EXISTS FILMS (
+  ID bigserial PRIMARY KEY,
+  NAME varchar,
+  DESCRIPTION varchar,
+  RELEASE_DATE date,
+  DURATION int,
+  RATING_ID int
 );
 
-CREATE TABLE IF NOT EXISTS "likes" (
-  "film_id" bigint,
-  "user_id" bigint,
-  PRIMARY KEY ("film_id", "user_id")
+CREATE TABLE IF NOT EXISTS LIKES (
+  FILM_ID bigint,
+  USER_ID bigint,
+  PRIMARY KEY (FILM_ID, USER_ID)
 );
 
-CREATE TABLE IF NOT EXISTS "genres" (
-  "id" bigserial PRIMARY KEY,
-  "name" varchar
+CREATE TABLE IF NOT EXISTS GENRES (
+  ID bigserial PRIMARY KEY,
+  NAME varchar
 );
 
-CREATE TABLE IF NOT EXISTS "film_genres" (
-  "film_id" bigint,
-  "genre_id" bigint,
-  PRIMARY KEY ("film_id", "genre_id")
+CREATE TABLE IF NOT EXISTS FILM_GENRES (
+  FILM_ID bigint,
+  GENRE_ID bigint,
+  PRIMARY KEY (FILM_ID, GENRE_ID)
 );
 
-CREATE TABLE IF NOT EXISTS "ratings" (
-  "id" bigserial PRIMARY KEY,
-  "name" varchar NOT NULL UNIQUE
+CREATE TABLE IF NOT EXISTS RATINGS (
+  ID bigserial PRIMARY KEY,
+  NAME varchar NOT NULL UNIQUE
 );
 
-ALTER TABLE "friendships" ADD FOREIGN KEY ("following_user_id") REFERENCES "users" ("id");
+ALTER TABLE LIKES ADD FOREIGN KEY (FILM_ID) REFERENCES FILMS (ID);
 
-ALTER TABLE "friendships" ADD FOREIGN KEY ("followed_user_id") REFERENCES "users" ("id");
+ALTER TABLE FILM_GENRES ADD FOREIGN KEY (FILM_ID) REFERENCES FILMS (ID);
 
-ALTER TABLE "likes" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE FILM_GENRES ADD FOREIGN KEY (GENRE_ID) REFERENCES GENRES (ID);
 
-ALTER TABLE "likes" ADD FOREIGN KEY ("film_id") REFERENCES "films" ("id");
+ALTER TABLE FILMS ADD FOREIGN KEY (RATING_ID) REFERENCES RATINGS (ID);
 
-ALTER TABLE "film_genres" ADD FOREIGN KEY ("film_id") REFERENCES "films" ("id");
+ALTER TABLE RELATIONS ADD FOREIGN KEY (FOLLOWING_USER_ID) REFERENCES USERS (ID);
 
-ALTER TABLE "film_genres" ADD FOREIGN KEY ("genre_id") REFERENCES "genres" ("id");
+ALTER TABLE RELATIONS ADD FOREIGN KEY (FOLLOWED_USER_ID) REFERENCES USERS (ID);
 
-ALTER TABLE "films" ADD FOREIGN KEY ("rating_id") REFERENCES "ratings" ("id");
+ALTER TABLE LIKES ADD FOREIGN KEY (USER_ID) REFERENCES USERS (ID);

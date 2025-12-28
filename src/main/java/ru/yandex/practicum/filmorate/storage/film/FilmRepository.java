@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class FilmRepository extends BaseRepository<Film> {
@@ -15,23 +15,57 @@ public class FilmRepository extends BaseRepository<Film> {
         super(jdbc, mapper);
     }
 
+    private static final String CREATE_QUERY =
+            "INSERT  INTO PUBLIC.FILMS (NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID) " +
+                    "VALUES(?, ?, ?, ?, ?)";
+
+    private static final String UPDATE_QUERY =
+            "UPDATE PUBLIC.FILMS SET " +
+                    "NAME = ?," +
+                    "DESCRIPTION = ?," +
+                    "RELEASE_DATE = ?," +
+                    "DURATION = ?," +
+                    "RATING_ID = ? " +
+                    "WHERE ID = ?;";
+
+    private static final String DELETE_QUERY =
+            "DELETE FROM PUBLIC.FILMS " +
+                    "WHERE ID = ?;";
+
+    private static final String GET_BY_ID_QUERY =
+            "SELECT f.ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATING_ID, r.NAME as RATING_NAME " +
+                    "FROM PUBLIC.FILMS f " +
+                    "LEFT JOIN PUBLIC.RATINGS r " +
+                    "ON  f.RATING_ID = r.ID " +
+                    "WHERE f.id = ?";
+
+    private static final String FIND_ALL_QUERY =
+            "SELECT f.ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATING_ID, r.NAME as RATING_NAME " +
+                    "FROM PUBLIC.FILMS f " +
+                    "LEFT JOIN PUBLIC.RATINGS r " +
+                    "ON  f.RATING_ID = r.ID ";
+
     public Film create(Film film) {
-        return null;
+        var id = insert(CREATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRating().getId());
+        film.setId(id);
+        return film;
     }
 
     public Film update(Film film) {
-        return null;
+        update(UPDATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRating().getId(), film.getId());
+        return film;
     }
 
-    public void delete(Long id) {
-
+    public boolean delete(Long id) {
+        return delete(DELETE_QUERY, id);
     }
 
-    public Film getById(Long id) {
-        return null;
+    public Optional<Film> getById(Long id) {
+        return findOne(GET_BY_ID_QUERY, id);
     }
 
     public Collection<Film> findAll() {
-        return List.of();
+
+        return findMany(FIND_ALL_QUERY);
     }
 }

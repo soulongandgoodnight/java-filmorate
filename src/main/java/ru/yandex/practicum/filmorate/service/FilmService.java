@@ -30,13 +30,13 @@ public class FilmService {
     private int defaultCount;
 
     public void addLike(long filmId, long userId) {
-        Film film = filmRepository.getById(filmId);
-        if (film == null) {
+        var film = filmRepository.getById(filmId);
+        if (film.isEmpty()) {
             throw new NotFoundException("Film id " + filmId + " not found");
         }
 
         var user = userRepository.getById(userId);
-        if (user == null) {
+        if (user.isEmpty()) {
             throw new NotFoundException("User id " + userId + " not found");
         }
 
@@ -44,13 +44,13 @@ public class FilmService {
     }
 
     public void removeLike(long filmId, long userId) {
-        Film film = filmRepository.getById(filmId);
-        if (film == null) {
+        var film = filmRepository.getById(filmId);
+        if (film.isEmpty()) {
             throw new NotFoundException("Film id " + filmId + " not found");
         }
 
         var user = userRepository.getById(userId);
-        if (user == null) {
+        if (user.isEmpty()) {
             throw new NotFoundException("User id " + userId + " not found");
         }
 
@@ -81,9 +81,9 @@ public class FilmService {
     }
 
     public Film getById(Long id) {
-        Film film = filmRepository.getById(id);
-        if (film == null) throw new NotFoundException("Film id " + id + " not found");
-        return film;
+        var film = filmRepository.getById(id);
+        if (film.isEmpty()) throw new NotFoundException("Film id " + id + " not found");
+        return film.get();
     }
 
     public Collection<Film> findAll() {
