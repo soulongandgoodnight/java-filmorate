@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -17,11 +17,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Component
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public final class FilmMapper {
-    private RatingRepository ratingRepository;
-    private GenreRepository genreRepository;
+    private final RatingRepository ratingRepository;
+    private final GenreRepository genreRepository;
 
     public Film mapToFilm(NewFilmRequest request) {
         var film = new Film();

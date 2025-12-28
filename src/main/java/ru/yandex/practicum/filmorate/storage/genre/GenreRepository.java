@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,10 @@ public class GenreRepository extends BaseRepository<Genre> {
             "SELECT ID, NAME " +
                     "FROM PUBLIC.GENRES WHERE ID = ?";
 
+    private static final String FIND_BY_FILM_ID_QUERY =
+            "SELECT GENRE_ID " +
+                    "FROM PUBLIC.FILM_GENRES WHERE FILM_ID = ?";
+
     public GenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
     }
@@ -31,5 +36,9 @@ public class GenreRepository extends BaseRepository<Genre> {
 
     public Optional<Genre> findById(long genreId) {
         return findOne(FIND_BY_ID_QUERY, genreId);
+    }
+
+    public Collection<Genre> findByFilmId(long filmId) {
+        return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }
 }

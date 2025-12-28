@@ -12,25 +12,25 @@ import java.util.Set;
 
 @Data
 public class Film {
-    @NotNull(groups = Marker.OnUpdate.class)
+    @NotNull
     private Long id;
 
-    @NotBlank(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Название не может быть пустым")
+    @NotBlank(message = "Название не может быть пустым")
     private String name;
 
-    @Size(max = 200, groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Описание не может быть длиннее 200 символов")
+    @Size(max = 200, message = "Описание не может быть длиннее 200 символов")
     private String description;
 
-    @NotNull(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Дата релиза не может быть null")
+    @NotNull(message = "Дата релиза не может быть null")
     private LocalDate releaseDate;
 
-    @Positive(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Продолжительность должна быть положительным числом")
+    @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;
 
     private Set<Long> likes = new HashSet<>();
 
     private Set<Genre> genres = new HashSet<>();
 
-    @NotNull(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Рейтинг MPA обязателен")
+    @NotNull(message = "Рейтинг MPA обязателен")
     private Rating rating;
 }

@@ -10,12 +10,13 @@ import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
+import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +26,7 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
+    private final GenreRepository genreRepository;
     private final FilmMapper mapper;
 
     @Value("${popular.default-count:10}")
@@ -59,18 +61,21 @@ public class FilmService {
     }
 
     public Collection<FilmDto> getPopular(Integer count) {
-//        if (count == null || count <= 0) {
-//            count = defaultCount;
-//        }
-//
-//        var mostLikedFilms = likeRepository.getMostLikedFilms(count);
-//        var result = new ArrayList<FilmDto>();
-//
-//        for(var filmId: mostLikedFilms) {
-//            var film = filmRepository.getById(filmId);
-//            var filmGenre = genreRepository.findById(film.get);
-//        }
-        return List.of();
+        if (count == null || count <= 0) {
+            count = defaultCount;
+        }
+
+        var mostLikedFilms = likeRepository.getMostLikedFilms(count);
+        var result = new ArrayList<FilmDto>();
+
+        for (var filmId : mostLikedFilms) {
+            var film = filmRepository.getById(filmId).get();
+            var filmGenres = genreRepository.findByFilmId(filmId);
+            film.setGenres(new HashSet<>(filmGenres));
+            result.add(mapper.mapToDto(film));
+        }
+
+        return result;
     }
 
     public FilmDto create(NewFilmRequest newFilmRequest) {
