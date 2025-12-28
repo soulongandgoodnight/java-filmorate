@@ -8,8 +8,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
@@ -17,7 +21,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,13 +52,13 @@ public class FilmControllerTest {
     @BeforeEach
     void clearData() {
         List<Long> filmIds = filmService.findAll().stream()
-                .map(Film::getId)
-                .collect(Collectors.toList());
+                .map(FilmDto::getId)
+                .toList();
         filmIds.forEach(filmRepository::delete);
 
         List<Long> userIds = userService.findAll().stream()
-                .map(User::getId)
-                .collect(Collectors.toList());
+                .map(UserDto::getId)
+                .toList();
         userIds.forEach(userRepository::delete);
     }
 
@@ -160,15 +163,16 @@ public class FilmControllerTest {
 
     @Test
     void shouldUpdateFilmWithValidFields() throws Exception {
-        Film createdFilm = new Film();
+        var createdFilm = new NewFilmRequest();
         createdFilm.setName("film1");
         createdFilm.setDescription("description1");
         createdFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         createdFilm.setDuration(70);
-        Film savedFilm = filmService.create(createdFilm);
+        createdFilm.setRatingId(1L);
+        var savedFilm = filmService.create(createdFilm);
         Long id = savedFilm.getId();
 
-        Film updateFilm = new Film();
+        var updateFilm = new UpdateFilmRequest();
         updateFilm.setId(id);
         updateFilm.setName("film2");
         updateFilm.setDescription("description2");
@@ -188,7 +192,7 @@ public class FilmControllerTest {
 
     @Test
     void whenUpdatingFilm_shouldFailOnUnknownId() throws Exception {
-        Film updateFilm = new Film();
+        var updateFilm = new UpdateFilmRequest();
         updateFilm.setId(999L);
         updateFilm.setName("film2");
         updateFilm.setDescription("description2");
@@ -203,7 +207,7 @@ public class FilmControllerTest {
 
     @Test
     void shouldReturnAllFilms() throws Exception {
-        Film validFilm = new Film();
+        var validFilm = new NewFilmRequest();
         validFilm.setName("film");
         validFilm.setDescription("description");
         validFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
@@ -219,27 +223,27 @@ public class FilmControllerTest {
 
     @Test
     void shouldReturnPopularFilms() throws Exception {
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setName("Lexa");
         user.setBirthday(LocalDate.of(2000, 1, 1));
-        User savedUser = userService.create(user);
+        var savedUser = userService.create(user);
         Long userId = savedUser.getId();
 
-        Film film1 = new Film();
+        var film1 = new NewFilmRequest();
         film1.setName("film1");
         film1.setDescription("description1");
         film1.setReleaseDate(LocalDate.of(2007, 7, 7));
         film1.setDuration(70);
-        Film savedFilm1 = filmService.create(film1);
+        var savedFilm1 = filmService.create(film1);
 
-        Film film2 = new Film();
+        var film2 = new NewFilmRequest();
         film2.setName("film2");
         film2.setDescription("description2");
         film2.setReleaseDate(LocalDate.of(2008, 8, 8));
         film2.setDuration(80);
-        Film savedFilm2 = filmService.create(film2);
+        var savedFilm2 = filmService.create(film2);
 
         mockMvc.perform(put("/films/{id}/like/{userId}", savedFilm1.getId(), userId))
                 .andExpect(status().isOk());
@@ -260,19 +264,19 @@ public class FilmControllerTest {
 
     @Test
     void shouldAddValidLike() throws Exception {
-        Film film = new Film();
+        var film = new NewFilmRequest();
         film.setName("film");
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2007, 7, 7));
         film.setDuration(70);
-        Film savedFilm = filmService.create(film);
+        var savedFilm = filmService.create(film);
         Long filmId = savedFilm.getId();
 
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setBirthday(LocalDate.of(2000, 1, 1));
-        User savedUser = userService.create(user);
+        var savedUser = userService.create(user);
         Long userId = savedUser.getId();
 
         mockMvc.perform(put("/films/{id}/like/{userId}", filmId, userId))
@@ -283,11 +287,11 @@ public class FilmControllerTest {
 
     @Test
     void shouldFailOnAddingLike_toUnknownFilm() throws Exception {
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setBirthday(LocalDate.of(2000, 1, 1));
-        User savedUser = userService.create(user);
+        var savedUser = userService.create(user);
         Long userId = savedUser.getId();
 
         mockMvc.perform(put("/films/{id}/like/{userId}", 999L, 1L))
@@ -296,7 +300,7 @@ public class FilmControllerTest {
 
     @Test
     void shouldFailOnAddingLike_toUnknownUser() throws Exception {
-        Film film = new Film();
+        var film = new NewFilmRequest();
         film.setName("film");
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2007, 7, 7));
@@ -309,19 +313,19 @@ public class FilmControllerTest {
 
     @Test
     void shouldRemoveValidLike() throws Exception {
-        Film film = new Film();
+        var film = new NewFilmRequest();
         film.setName("film");
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2007, 7, 7));
         film.setDuration(70);
-        Film savedFilm = filmService.create(film);
+        var savedFilm = filmService.create(film);
         Long filmId = savedFilm.getId();
 
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setBirthday(LocalDate.of(2000, 1, 1));
-        User savedUser = userService.create(user);
+        var savedUser = userService.create(user);
         Long userId = savedUser.getId();
 
         mockMvc.perform(put("/films/{id}/like/{userId}", filmId, userId))
@@ -335,7 +339,7 @@ public class FilmControllerTest {
 
     @Test
     void shouldFailOnRemovingLike_onUnknownFilm() throws Exception {
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setBirthday(LocalDate.of(2000, 1, 1));
@@ -347,7 +351,7 @@ public class FilmControllerTest {
 
     @Test
     void shouldFailOnRemovingLike_onUnknownUser() throws Exception {
-        Film film = new Film();
+        var film = new NewFilmRequest();
         film.setName("film");
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2007, 7, 7));
