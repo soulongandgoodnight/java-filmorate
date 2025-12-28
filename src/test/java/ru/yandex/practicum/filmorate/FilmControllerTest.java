@@ -13,8 +13,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
+import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,11 +43,11 @@ public class FilmControllerTest {
 
     @Autowired
     @Qualifier("filmDbStorage")
-    private FilmStorage filmStorage;
+    private FilmRepository filmStorage;
 
     @Autowired
     @Qualifier("userDbStorage")
-    private UserStorage userStorage;
+    private UserRepository userStorage;
 
     @BeforeEach
     void clearData() {

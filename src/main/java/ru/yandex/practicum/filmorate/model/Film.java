@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -33,36 +32,5 @@ public class Film {
     private Set<Genre> genres = new HashSet<>();
 
     @NotNull(groups = {Marker.OnCreate.class, Marker.OnUpdate.class}, message = "Рейтинг MPA обязателен")
-    private Mpa mpa;
-
-    @Getter
-    public enum Genre {
-        COMEDY("Комедия"), DRAMA("Драма"), ANIMATION("Мультфильм"), THRILLER("Триллер"),
-        DOCUMENTARY("Документальный"), ACTION("Боевик");
-
-        private final String name;
-
-        Genre(String name) {
-            this.name = name;
-        }
-    }
-
-    @Getter
-    public enum Mpa {
-        G("G"),
-        PG("PG"),
-        PG_13("PG-13"),
-        R("R"),
-        NC_17("NC-17");
-
-        private final String description;
-
-        Mpa(String description) {
-            this.description = description;
-        }
-
-//        public String getDescription() {
-//            return description;
-//        }
-    }
+    private Rating rating;
 }

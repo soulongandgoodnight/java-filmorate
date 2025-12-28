@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.relation.RelationStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Qualifier("userDbStorage")
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
     private final RelationStorage relationStorage;
 
     public void addFriend(Long userId, Long friendId) {
@@ -68,7 +68,7 @@ public class UserService {
     public Collection<User> getFriends(Long userId) {
         var relations = relationStorage.getAllByUserId(userId);
         var confirmedFriends = getFriendsSet(relations);
-        return userStorage.getByIds(confirmedFriends);
+        return userRepository.getByIds(confirmedFriends);
     }
 
     public Collection<User> getCommonFriends(Long userId, Long otherId) {
@@ -93,20 +93,20 @@ public class UserService {
     }
 
     public User create(User user) {
-        return userStorage.create(user);
+        return userRepository.create(user);
     }
 
     public User update(User user) {
-        return userStorage.update(user);
+        return userRepository.update(user);
     }
 
     public User getById(Long id) {
-        User user = userStorage.getById(id);
-        if (user == null) throw new NotFoundException("User with id " + id + " not found");
-        return user;
+        var user = userRepository.getById(id);
+        if (user.isEmpty()) throw new NotFoundException("User with id " + id + " not found");
+        return user.get();
     }
 
     public Collection<User> findAll() {
-        return userStorage.findAll();
+        return userRepository.findAll();
     }
 }

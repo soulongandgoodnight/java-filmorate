@@ -1,19 +1,20 @@
 CREATE TABLE IF NOT EXISTS "users" (
-  "id" serial PRIMARY KEY,
+  "id" bigserial PRIMARY KEY,
   "email" varchar,
+  "login" varchar,
   "name" varchar,
   "birthday" date
 );
 
 CREATE TABLE IF NOT EXISTS "friendships" (
-  "following_user_id" integer,
-  "followed_user_id" integer,
+  "following_user_id" bigint,
+  "followed_user_id" bigint,
   "is_friendship_confirmed" bool,
   PRIMARY KEY ("following_user_id", "followed_user_id")
 );
 
 CREATE TABLE IF NOT EXISTS "films" (
-  "id" serial PRIMARY KEY,
+  "id" bigserial PRIMARY KEY,
   "name" varchar,
   "description" varchar,
   "release_date" date,
@@ -22,24 +23,24 @@ CREATE TABLE IF NOT EXISTS "films" (
 );
 
 CREATE TABLE IF NOT EXISTS "likes" (
-  "film_id" integer,
-  "user_id" integer,
+  "film_id" bigint,
+  "user_id" bigint,
   PRIMARY KEY ("film_id", "user_id")
 );
 
 CREATE TABLE IF NOT EXISTS "genres" (
-  "id" serial PRIMARY KEY,
+  "id" bigserial PRIMARY KEY,
   "name" varchar
 );
 
 CREATE TABLE IF NOT EXISTS "film_genres" (
-  "film_id" integer,
-  "genre_id" integer,
+  "film_id" bigint,
+  "genre_id" bigint,
   PRIMARY KEY ("film_id", "genre_id")
 );
 
 CREATE TABLE IF NOT EXISTS "ratings" (
-  "id" serial PRIMARY KEY,
+  "id" bigserial PRIMARY KEY,
   "name" varchar NOT NULL UNIQUE
 );
 

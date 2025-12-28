@@ -5,63 +5,88 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
+import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
+import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
+import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmService {
 
     @Qualifier("filmDbStorage")
-    private final FilmStorage filmStorage;
-    private final UserService userService;
+    private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
+    private final GenreRepository genreRepository;
 
     @Value("${popular.default-count:10}")
     private int defaultCount;
 
-    public void addLike(Long filmId, Long userId) {
-        Film film = getById(filmId);
-        userService.getById(userId);
-        film.getLikes().add(userId);
-        filmStorage.update(film);
+    public void addLike(long filmId, long userId) {
+        Film film = filmRepository.getById(filmId);
+        if (film == null) {
+            throw new NotFoundException("Film id " + filmId + " not found");
+        }
+
+        var user = userRepository.getById(userId);
+        if (user == null) {
+            throw new NotFoundException("User id " + userId + " not found");
+        }
+
+        likeRepository.addLike(filmId, userId);
     }
 
-    public void removeLike(Long filmId, Long userId) {
-        Film film = getById(filmId);
-        userService.getById(userId);
-        film.getLikes().remove(userId);
-        filmStorage.update(film);
+    public void removeLike(long filmId, long userId) {
+        Film film = filmRepository.getById(filmId);
+        if (film == null) {
+            throw new NotFoundException("Film id " + filmId + " not found");
+        }
+
+        var user = userRepository.getById(userId);
+        if (user == null) {
+            throw new NotFoundException("User id " + userId + " not found");
+        }
+
+        likeRepository.removeLike(filmId, userId);
     }
 
-    public Collection<Film> getPopular(Integer count) {
-        if (count == null || count <= 0) count = defaultCount;
-        return filmStorage.findAll().stream()
-                .sorted(
-                        Comparator.comparingInt(f -> -f.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<FilmDto> getPopular(Integer count) {
+//        if (count == null || count <= 0) {
+//            count = defaultCount;
+//        }
+//
+//        var mostLikedFilms = likeRepository.getMostLikedFilms(count);
+//        var result = new ArrayList<FilmDto>();
+//
+//        for(var filmId: mostLikedFilms) {
+//            var film = filmRepository.getById(filmId);
+//            var filmGenre = genreRepository.findById(film.get);
+//        }
+        return List.of();
     }
 
     public Film create(Film film) {
-        return filmStorage.create(film);
+        return filmRepository.create(film);
     }
 
     public Film update(Film film) {
-        return filmStorage.update(film);
+        return filmRepository.update(film);
     }
 
     public Film getById(Long id) {
-        Film film = filmStorage.getById(id);
-        if (film == null) throw new NotFoundException("Film with id " + id + " not found");
+        Film film = filmRepository.getById(id);
+        if (film == null) throw new NotFoundException("Film id " + id + " not found");
         return film;
     }
 
     public Collection<Film> findAll() {
-        return filmStorage.findAll();
+        return filmRepository.findAll();
     }
 }
