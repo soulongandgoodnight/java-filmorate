@@ -5,14 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
 import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -21,6 +25,7 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
+    private final FilmMapper mapper;
 
     @Value("${popular.default-count:10}")
     private int defaultCount;
@@ -68,21 +73,32 @@ public class FilmService {
         return List.of();
     }
 
-    public Film create(Film film) {
-        return filmRepository.create(film);
+    public FilmDto create(NewFilmRequest newFilmRequest) {
+        var film = mapper.mapToFilm(newFilmRequest);
+        var result = filmRepository.create(film);
+        return mapper.mapToDto(result);
     }
 
-    public Film update(Film film) {
-        return filmRepository.update(film);
+    public FilmDto update(UpdateFilmRequest updateFilmRequest) {
+        var film = filmRepository.getById(updateFilmRequest.getId());
+        if (film.isEmpty()) {
+            throw new NotFoundException("Film id " + updateFilmRequest.getId() + " not found");
+        }
+
+        mapper.updateFilmFields(film.get(), updateFilmRequest);
+        var result = filmRepository.update(film.get());
+
+        return mapper.mapToDto(result);
     }
 
-    public Film getById(Long id) {
+    public FilmDto getById(Long id) {
         var film = filmRepository.getById(id);
         if (film.isEmpty()) throw new NotFoundException("Film id " + id + " not found");
-        return film.get();
+        return mapper.mapToDto(film.get());
     }
 
-    public Collection<Film> findAll() {
-        return filmRepository.findAll();
+    public Collection<FilmDto> findAll() {
+        var films = filmRepository.findAll();
+        return films.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
     }
 }

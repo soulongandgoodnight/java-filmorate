@@ -3,12 +3,16 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Relation;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.relation.RelationRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +24,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RelationRepository relationRepository;
+    private final UserMapper mapper;
 
     public void addFriend(Long userId, Long friendId) {
         var userRelationOptional = relationRepository.findRelation(userId, friendId);
@@ -60,13 +65,14 @@ public class UserService {
     }
 
 
-    public Collection<User> getFriends(Long userId) {
+    public Collection<UserDto> getFriends(Long userId) {
         var relations = relationRepository.getAllByUserId(userId);
         var confirmedFriends = getFriendsSet(relations);
-        return userRepository.getByIds(confirmedFriends);
+        var result = userRepository.getByIds(confirmedFriends);
+        return result.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Collection<User> getCommonFriends(Long userId, Long otherId) {
+    public Collection<UserDto> getCommonFriends(Long userId, Long otherId) {
         var userRelations = relationRepository.getAllByUserId(userId);
         var otherPersonRelations = relationRepository.getAllByUserId(otherId);
         var userFriends = getFriendsSet(userRelations);
@@ -87,21 +93,30 @@ public class UserService {
         return result;
     }
 
-    public User create(User user) {
-        return userRepository.create(user);
+    public UserDto create(NewUserRequest newUserRequest) {
+        var user = mapper.mapToUser(newUserRequest);
+        var result = userRepository.create(user);
+        return mapper.mapToDto(result);
     }
 
-    public User update(User user) {
-        return userRepository.update(user);
+    public UserDto update(UpdateUserRequest updateUserRequest) {
+        var user = userRepository.getById(updateUserRequest.getId());
+        if (user.isEmpty()) {
+            throw new NotFoundException("User with id " + updateUserRequest.getId() + " not found");
+        }
+        mapper.updateUserFields(user.get(), updateUserRequest);
+        var result = userRepository.update(user.get());
+        return mapper.mapToDto(result);
     }
 
-    public User getById(Long id) {
+    public UserDto getById(Long id) {
         var user = userRepository.getById(id);
         if (user.isEmpty()) throw new NotFoundException("User with id " + id + " not found");
-        return user.get();
+        return mapper.mapToDto(user.get());
     }
 
-    public Collection<User> findAll() {
-        return userRepository.findAll();
+    public Collection<UserDto> findAll() {
+        var users = userRepository.findAll();
+        return users.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
     }
 }
