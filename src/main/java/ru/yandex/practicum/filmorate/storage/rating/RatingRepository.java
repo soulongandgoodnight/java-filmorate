@@ -11,8 +11,8 @@ import java.util.Optional;
 
 @Repository
 public class RatingRepository extends BaseRepository<Rating> {
-    private static final String FIND_ALL_QUERY = "SELECT \"id\", \"name\" from PUBLIC.\"ratings\"";
-    private static final String FIND_BY_ID_QUERY = "SELECT \"id\", \"name\" from PUBLIC.\"ratings\" WHERE \"id\" = ?";
+    private static final String FIND_ALL_QUERY = "SELECT ID, NAME FROM PUBLIC.RATINGS";
+    private static final String FIND_BY_ID_QUERY = "SELECT ID, NAME FROM PUBLIC.RATINGS WHERE id = ?";
 
     public RatingRepository(JdbcTemplate jdbc, RowMapper<Rating> mapper) {
         super(jdbc, mapper);
