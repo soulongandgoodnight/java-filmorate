@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.relation.RelationStorage;
+import ru.yandex.practicum.filmorate.storage.relation.RelationRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.Collection;
@@ -21,59 +21,56 @@ public class UserService {
 
     @Qualifier("userDbStorage")
     private final UserRepository userRepository;
-    private final RelationStorage relationStorage;
+    private final RelationRepository relationRepository;
 
     public void addFriend(Long userId, Long friendId) {
-        var userRelation = relationStorage.getByUserId(userId);
-        var friendRelation = relationStorage.getByUserId(friendId);
+        var userRelationOptional = relationRepository.findRelation(userId, friendId);
+        var friendRelationOptional = relationRepository.findRelation(friendId, userId);
 
-        if (userRelation == null && friendRelation == null) {
+        if (userRelationOptional.isEmpty() && friendRelationOptional.isEmpty()) {
             var newRelation = new Relation();
-            newRelation.setUserId(userId);
-            newRelation.setFriendId(friendId);
-            newRelation.setStatus(Relation.FriendshipStatus.PENDING);
-            relationStorage.addRelation(newRelation);
+            newRelation.setFollowingUserId(userId);
+            newRelation.setFollowedUserId(friendId);
+            newRelation.setIsFriendshipConfirmed(false);
+            relationRepository.addRelation(newRelation);
             return;
         }
 
-        if (friendRelation != null && friendRelation.getStatus() == Relation.FriendshipStatus.PENDING) {
-            friendRelation.setStatus(Relation.FriendshipStatus.CONFIRMED);
-            relationStorage.updateRelation(friendRelation);
-            if (userRelation == null) {
-                userRelation = new Relation();
-                userRelation.setUserId(userId);
-                userRelation.setFriendId(friendId);
-                userRelation.setStatus(Relation.FriendshipStatus.CONFIRMED);
-                relationStorage.addRelation(userRelation);
+        if (friendRelationOptional.isPresent() && !friendRelationOptional.get().getIsFriendshipConfirmed()) {
+            var friendRelation = friendRelationOptional.get();
+            friendRelation.setIsFriendshipConfirmed(true);
+            relationRepository.updateRelation(friendRelation);
+            if (userRelationOptional.isEmpty()) {
+                var userRelation = new Relation();
+                userRelation.setFollowingUserId(userId);
+                userRelation.setFollowedUserId(friendId);
+                userRelation.setIsFriendshipConfirmed(true);
+                relationRepository.addRelation(userRelation);
             } else {
-                userRelation.setStatus(Relation.FriendshipStatus.CONFIRMED);
-                relationStorage.updateRelation(userRelation);
+                var userRelation = userRelationOptional.get();
+                userRelation.setIsFriendshipConfirmed(true);
+                relationRepository.updateRelation(userRelation);
             }
         }
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        var userRelation = relationStorage.getByUserId(userId);
-        var friendRelation = relationStorage.getByUserId(friendId);
-        if (userRelation != null) {
-            relationStorage.removeRelation(userRelation);
-        }
-
-        if (friendRelation != null) {
-            relationStorage.removeRelation(friendRelation);
-        }
+        var userRelation = relationRepository.findRelation(userId, friendId);
+        var friendRelation = relationRepository.findRelation(friendId, userId);
+        userRelation.ifPresent(relationRepository::removeRelation);
+        friendRelation.ifPresent(relationRepository::removeRelation);
     }
 
 
     public Collection<User> getFriends(Long userId) {
-        var relations = relationStorage.getAllByUserId(userId);
+        var relations = relationRepository.getAllByUserId(userId);
         var confirmedFriends = getFriendsSet(relations);
         return userRepository.getByIds(confirmedFriends);
     }
 
     public Collection<User> getCommonFriends(Long userId, Long otherId) {
-        var userRelations = relationStorage.getAllByUserId(userId);
-        var otherPersonRelations = relationStorage.getAllByUserId(otherId);
+        var userRelations = relationRepository.getAllByUserId(userId);
+        var otherPersonRelations = relationRepository.getAllByUserId(otherId);
         var userFriends = getFriendsSet(userRelations);
         var otherPersonFriends = getFriendsSet(otherPersonRelations);
 
@@ -84,8 +81,8 @@ public class UserService {
     private Set<Long> getFriendsSet(Collection<Relation> relations) {
         Set<Long> result = new HashSet<>();
         for (var relation : relations) {
-            if (relation.getStatus() == Relation.FriendshipStatus.CONFIRMED) {
-                result.add(relation.getFriendId());
+            if (relation.getIsFriendshipConfirmed()) {
+                result.add(relation.getFollowedUserId());
             }
         }
 
