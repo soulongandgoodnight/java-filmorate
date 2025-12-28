@@ -13,8 +13,13 @@ import java.util.Optional;
 @Repository
 @Component
 public class GenreRepository extends BaseRepository<Genre> {
-    private static final String FIND_ALL_QUERY = "SELECT \"id\", \"name\" from PUBLIC.\"genres\"";
-    private static final String FIND_BY_ID_QUERY = "SELECT \"id\", \"name\" from PUBLIC.\"genres\" WHERE \"id\" = ?";
+    private static final String FIND_ALL_QUERY =
+            "SELECT ID, NAME " +
+                    "FROM PUBLIC.GENRES";
+
+    private static final String FIND_BY_ID_QUERY =
+            "SELECT ID, NAME " +
+                    "FROM PUBLIC.GENRES WHERE ID = ?";
 
     public GenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
