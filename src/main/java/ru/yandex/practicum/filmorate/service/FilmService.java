@@ -2,14 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
-import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
@@ -20,11 +18,9 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmService {
 
-    @Qualifier("filmDbStorage")
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
-    private final GenreRepository genreRepository;
 
     @Value("${popular.default-count:10}")
     private int defaultCount;

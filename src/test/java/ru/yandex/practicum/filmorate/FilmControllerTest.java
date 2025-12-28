@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -42,11 +41,9 @@ public class FilmControllerTest {
     private FilmService filmService;
 
     @Autowired
-    @Qualifier("filmDbStorage")
     private FilmRepository filmStorage;
 
     @Autowired
-    @Qualifier("userDbStorage")
     private UserRepository userStorage;
 
     @BeforeEach
