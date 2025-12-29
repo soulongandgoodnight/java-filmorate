@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.dto.film;
 
 import lombok.Data;
+import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 @Data
 public class FilmDto {
@@ -13,8 +13,7 @@ public class FilmDto {
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private Set<Long> likes = new HashSet<>();
-    private Set<Long> genreIds = new HashSet<>();
-    private long ratingId;
+    private Collection<GenreDto> genres;
+    private RatingDto mpa;
 
 }

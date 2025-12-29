@@ -20,6 +20,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -168,7 +169,7 @@ public class FilmControllerTest {
         createdFilm.setDescription("description1");
         createdFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         createdFilm.setDuration(70);
-        createdFilm.setRatingId(1L);
+        createdFilm.setMpa(1L);
         var savedFilm = filmService.create(createdFilm);
         Long id = savedFilm.getId();
 
@@ -198,7 +199,10 @@ public class FilmControllerTest {
         updateFilm.setDescription("description2");
         updateFilm.setReleaseDate(LocalDate.of(2008, 8, 8));
         updateFilm.setDuration(80);
-
+        updateFilm.setMpa(1L);
+        var genreIds = new HashSet<Long>();
+        genreIds.add(1L);
+        updateFilm.setGenreIds(genreIds);
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateFilm)))
@@ -212,6 +216,7 @@ public class FilmControllerTest {
         validFilm.setDescription("description");
         validFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         validFilm.setDuration(70);
+        validFilm.setMpa(1L);
         filmService.create(validFilm);
 
         mockMvc.perform(get("/films"))
@@ -236,6 +241,7 @@ public class FilmControllerTest {
         film1.setDescription("description1");
         film1.setReleaseDate(LocalDate.of(2007, 7, 7));
         film1.setDuration(70);
+        film1.setMpa(1L);
         var savedFilm1 = filmService.create(film1);
 
         var film2 = new NewFilmRequest();
@@ -243,6 +249,7 @@ public class FilmControllerTest {
         film2.setDescription("description2");
         film2.setReleaseDate(LocalDate.of(2008, 8, 8));
         film2.setDuration(80);
+        film2.setMpa(1L);
         var savedFilm2 = filmService.create(film2);
 
         mockMvc.perform(put("/films/{id}/like/{userId}", savedFilm1.getId(), userId))

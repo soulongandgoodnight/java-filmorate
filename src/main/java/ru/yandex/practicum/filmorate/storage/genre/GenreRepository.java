@@ -16,7 +16,8 @@ import java.util.Optional;
 public class GenreRepository extends BaseRepository<Genre> {
     private static final String FIND_ALL_QUERY =
             "SELECT ID, NAME " +
-                    "FROM PUBLIC.GENRES";
+                    "FROM PUBLIC.GENRES " +
+                    "ORDER BY ID";
 
     private static final String FIND_BY_ID_QUERY =
             "SELECT ID, NAME " +
@@ -24,7 +25,8 @@ public class GenreRepository extends BaseRepository<Genre> {
 
     private static final String FIND_BY_FILM_ID_QUERY =
             "SELECT GENRE_ID " +
-                    "FROM PUBLIC.FILM_GENRES WHERE FILM_ID = ?";
+                    "FROM PUBLIC.FILM_GENRES WHERE FILM_ID = ? " +
+                    "ORDER BY GENRE_ID";
 
     public GenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);

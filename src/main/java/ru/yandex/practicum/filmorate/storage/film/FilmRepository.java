@@ -46,13 +46,23 @@ public class FilmRepository extends BaseRepository<Film> {
                     "ON  f.RATING_ID = r.ID ";
 
     public Film create(Film film) {
-        var id = insert(CREATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRating().getId());
+        Long ratingId = null;
+        if (film.getRating() != null) {
+            ratingId = film.getRating().getId();
+        }
+
+        var id = insert(CREATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), ratingId);
         film.setId(id);
         return film;
     }
 
     public Film update(Film film) {
-        update(UPDATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRating().getId(), film.getId());
+        Long ratingId = null;
+        if (film.getRating() != null) {
+            ratingId = film.getRating().getId();
+        }
+
+        update(UPDATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), ratingId, film.getId());
         return film;
     }
 

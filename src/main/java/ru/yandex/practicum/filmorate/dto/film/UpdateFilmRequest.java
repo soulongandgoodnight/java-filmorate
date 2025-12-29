@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -24,10 +25,9 @@ public class UpdateFilmRequest {
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;
 
-    @Size(min = 1, message = "Должен быть указан хотя бы 1 жанр")
-    private Set<Long> genreIds = new HashSet<>();
+    private Set<GenreDto> genreIds = new HashSet<>();
 
-    private Long ratingId;
+    private RatingDto mpa;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());
@@ -50,6 +50,6 @@ public class UpdateFilmRequest {
     }
 
     public boolean hasRating() {
-        return !(ratingId == null);
+        return !(mpa == null && mpa.getId() != null);
     }
 }

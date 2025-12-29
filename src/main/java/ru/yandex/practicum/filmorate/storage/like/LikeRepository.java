@@ -28,10 +28,12 @@ public class LikeRepository {
                     "WHERE FILM_ID = ?;";
 
     private static final String GET_MOST_LIKED_FILMS_QUERY =
-            "SELECT FILM_ID " +
-                    "FROM PUBLIC.LIKES " +
-                    "GROUP BY FILM_ID " +
-                    "ORDER BY count(FILM_ID) DESC LIMIT ?";
+            "SELECT F.ID " +
+                    "FROM PUBLIC.FILMS F " +
+                    "LEFT JOIN PUBLIC.LIKES L " +
+                    "ON F.ID = L.FILM_ID " +
+                    "GROUP BY F.ID " +
+                    "ORDER BY count(L.FILM_ID) DESC LIMIT ?";
 
     private final JdbcTemplate jdbc;
 

@@ -10,6 +10,9 @@ import ru.yandex.practicum.filmorate.model.Rating;
 @Component
 public class RatingMapper {
     public RatingDto mapToDto(Rating rating) {
+        if (rating == null) {
+            return null;
+        }
         var result = new RatingDto();
         result.setId(rating.getId());
         result.setName(rating.getName());
