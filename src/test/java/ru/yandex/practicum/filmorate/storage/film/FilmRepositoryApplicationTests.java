@@ -22,7 +22,7 @@ public class FilmRepositoryApplicationTests {
         this.filmRepository = new FilmRepository(jdbc, new FilmRowMapper());
         defaultRating = new Rating();
         defaultRating.setId(1L);
-        defaultRating.setName("0+");
+        defaultRating.setName("G");
     }
 
     @Test

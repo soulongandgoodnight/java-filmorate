@@ -26,7 +26,7 @@ public class RatingRepositoryApplicationTests {
                 .hasValueSatisfying(rating ->
                         assertThat(rating)
                                 .hasFieldOrPropertyWithValue("id", 1L)
-                                .hasFieldOrPropertyWithValue("name", "0+"));
+                                .hasFieldOrPropertyWithValue("name", "G"));
     }
 
     @Test

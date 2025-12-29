@@ -20,7 +20,11 @@ public final class UserMapper {
         var user = new User();
         user.setEmail(dto.getEmail());
         user.setLogin(dto.getLogin());
-        user.setName(dto.getName());
+        if (dto.mustUseLoginAsName()) {
+            user.setName(dto.getLogin());
+        } else {
+            user.setName(dto.getName());
+        }
         user.setBirthday(dto.getBirthday());
         user.setRelations(new HashMap<>());
 
@@ -40,7 +44,9 @@ public final class UserMapper {
             user.setBirthday(dto.getBirthday());
         }
 
-        if (dto.hasName()) {
+        if (dto.mustUseLoginAsName()) {
+            user.setName(dto.getLogin());
+        } else {
             user.setName(dto.getName());
         }
 

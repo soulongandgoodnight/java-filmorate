@@ -38,6 +38,10 @@ public class UpdateUserRequest {
     }
 
     public boolean hasName() {
-        return birthday != null;
+        return name != null;
+    }
+
+    public boolean mustUseLoginAsName() {
+        return !hasName() && hasLogin();
     }
 }

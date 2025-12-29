@@ -143,7 +143,7 @@ public class FilmControllerTest {
 
     @Test
     void whenCreatingFilm_shouldFailOnNegativeDuration() throws Exception {
-        Film notValidFilm = new Film();
+        var notValidFilm = new NewFilmRequest();
         notValidFilm.setName("film");
         notValidFilm.setDescription("description");
         notValidFilm.setReleaseDate(LocalDate.of(2007, 7, 7));

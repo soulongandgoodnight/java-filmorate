@@ -20,4 +20,8 @@ public class NewUserRequest {
     @NotNull(message = "Дата рождения не может быть null")
     @Past(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
+
+    public boolean mustUseLoginAsName() {
+        return name == null || name.isBlank();
+    }
 }
