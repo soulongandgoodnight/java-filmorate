@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,6 +26,15 @@ public class UserService {
     private final UserMapper mapper;
 
     public void addFriend(Long userId, Long friendId) {
+        var userOptional = userRepository.getById(userId);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+
+        var friendOptional = userRepository.getById(friendId);
+        if (friendOptional.isEmpty()) {
+            throw new NotFoundException("Friend with id " + userId + " not found");
+        }
         var userRelationOptional = relationRepository.findRelation(userId, friendId);
         var friendRelationOptional = relationRepository.findRelation(friendId, userId);
 
@@ -58,16 +66,28 @@ public class UserService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
+        var userOptional = userRepository.getById(userId);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+
+        var friendOptional = userRepository.getById(friendId);
+        if (friendOptional.isEmpty()) {
+            throw new NotFoundException("Friend with id " + userId + " not found");
+        }
+
         var userRelation = relationRepository.findRelation(userId, friendId);
-        var friendRelation = relationRepository.findRelation(friendId, userId);
         userRelation.ifPresent(relationRepository::removeRelation);
-        friendRelation.ifPresent(relationRepository::removeRelation);
     }
 
 
     public Collection<UserDto> getFriends(Long userId) {
+        var userOptional = userRepository.getById(userId);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
         var relations = relationRepository.getAllByUserId(userId);
-        var confirmedFriends = getFriendsSet(relations);
+        var confirmedFriends = getFriendIdsSet(relations);
         var result = userRepository.getByIds(confirmedFriends);
         return result.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
     }
@@ -75,22 +95,15 @@ public class UserService {
     public Collection<UserDto> getCommonFriends(Long userId, Long otherId) {
         var userRelations = relationRepository.getAllByUserId(userId);
         var otherPersonRelations = relationRepository.getAllByUserId(otherId);
-        var userFriends = getFriendsSet(userRelations);
-        var otherPersonFriends = getFriendsSet(otherPersonRelations);
+        var userFriends = getFriendIdsSet(userRelations);
+        var otherPersonFriends = getFriendIdsSet(otherPersonRelations);
 
         userFriends.retainAll(otherPersonFriends);
         return userFriends.stream().map(this::getById).collect(Collectors.toList());
     }
 
-    private Set<Long> getFriendsSet(Collection<Relation> relations) {
-        Set<Long> result = new HashSet<>();
-        for (var relation : relations) {
-            if (relation.getIsFriendshipConfirmed()) {
-                result.add(relation.getFollowedUserId());
-            }
-        }
-
-        return result;
+    private Set<Long> getFriendIdsSet(Collection<Relation> relations) {
+        return relations.stream().map(Relation::getFollowedUserId).collect(Collectors.toSet());
     }
 
     public UserDto create(NewUserRequest newUserRequest) {
