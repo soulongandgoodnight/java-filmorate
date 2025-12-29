@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
 import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
@@ -16,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -104,6 +106,7 @@ public class FilmService {
 
     public Collection<FilmDto> findAll() {
         var films = filmRepository.findAll();
-        return films.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
+        return films.stream().sorted(Comparator.comparing(Film::getId))
+                .map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
     }
 }
