@@ -10,15 +10,13 @@ import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
 import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,30 +81,54 @@ public class FilmService {
     public FilmDto create(NewFilmRequest newFilmRequest) {
         var film = mapper.mapToFilm(newFilmRequest);
         var result = filmRepository.create(film);
+        setGenresForFilm(film, Set.of(), film.getGenres());
         return mapper.mapToDto(result);
     }
 
     public FilmDto update(UpdateFilmRequest updateFilmRequest) {
-        var film = filmRepository.getById(updateFilmRequest.getId());
-        if (film.isEmpty()) {
+        var filmOptional = filmRepository.getById(updateFilmRequest.getId());
+        if (filmOptional.isEmpty()) {
             throw new NotFoundException("Film id " + updateFilmRequest.getId() + " not found");
         }
 
-        mapper.updateFilmFields(film.get(), updateFilmRequest);
-        var result = filmRepository.update(film.get());
-
+        var film = filmOptional.get();
+        var oldGenres = film.getGenres();
+        mapper.updateFilmFields(film, updateFilmRequest);
+        var newGenres = film.getGenres();
+        var result = filmRepository.update(film);
+        setGenresForFilm(result, oldGenres, newGenres);
         return mapper.mapToDto(result);
     }
 
     public FilmDto getById(Long id) {
-        var film = filmRepository.getById(id);
-        if (film.isEmpty()) throw new NotFoundException("Film id " + id + " not found");
-        return mapper.mapToDto(film.get());
+        var filmOptional = filmRepository.getById(id);
+        if (filmOptional.isEmpty()) throw new NotFoundException("Film id " + id + " not found");
+        var filmGenres = genreRepository.findByFilmId(id);
+        var film = filmOptional.get();
+        film.setGenres(new HashSet<>(filmGenres));
+        return mapper.mapToDto(film);
     }
 
     public Collection<FilmDto> findAll() {
         var films = filmRepository.findAll();
         return films.stream().sorted(Comparator.comparing(Film::getId))
                 .map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private void setGenresForFilm(Film film, Set<Genre> oldGenres, Set<Genre> newGenres) {
+        if (newGenres == null) {
+            return;
+        }
+
+        var genresToDelete = oldGenres.stream().filter(old -> !newGenres.contains(old)).toList();
+        var genresToAdd = newGenres.stream().filter(n -> !oldGenres.contains(n)).toList();
+
+        for (var genreToAdd : genresToAdd) {
+            genreRepository.createGenreForFilm(film.getId(), genreToAdd.getId());
+        }
+
+        for (var genreToDelete : genresToDelete) {
+            genreRepository.deleteGenreForFilm(film.getId(), genreToDelete.getId());
+        }
     }
 }

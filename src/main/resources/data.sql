@@ -1,5 +1,5 @@
 MERGE INTO RATINGS
-USING ( VALUES (1, '0+'), (2, '6+'), (3, '12+'), (4, '16+'), (5, '18+')) s(ID, NAME)
+USING ( VALUES (1, 'G'), (2, 'PG'), (3, 'PG-13'), (4, 'R'), (5, 'NC-17')) s(ID, NAME)
 on RATINGS.ID = s.ID
 when not matched then insert values (s.ID, s.NAME);
 
