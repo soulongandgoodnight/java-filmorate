@@ -74,7 +74,7 @@ public final class FilmMapper {
         }
 
         if (dto.hasGenres()) {
-            var genres = getExistingGenres(dto.getGenreIds());
+            var genres = getExistingGenres(dto.getGenres());
             film.setGenres(genres);
         }
 

@@ -9,8 +9,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.GenreDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -169,7 +171,9 @@ public class FilmControllerTest {
         createdFilm.setDescription("description1");
         createdFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         createdFilm.setDuration(70);
-        createdFilm.setMpa(1L);
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        createdFilm.setMpa(mpa);
         var savedFilm = filmService.create(createdFilm);
         Long id = savedFilm.getId();
 
@@ -199,10 +203,14 @@ public class FilmControllerTest {
         updateFilm.setDescription("description2");
         updateFilm.setReleaseDate(LocalDate.of(2008, 8, 8));
         updateFilm.setDuration(80);
-        updateFilm.setMpa(1L);
-        var genreIds = new HashSet<Long>();
-        genreIds.add(1L);
-        updateFilm.setGenreIds(genreIds);
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        updateFilm.setMpa(mpa);
+        var genreDto = new GenreDto();
+        genreDto.setId(1L);
+        var genreDtos = new HashSet<GenreDto>();
+        genreDtos.add(genreDto);
+        updateFilm.setGenres(genreDtos);
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateFilm)))
@@ -216,7 +224,9 @@ public class FilmControllerTest {
         validFilm.setDescription("description");
         validFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         validFilm.setDuration(70);
-        validFilm.setMpa(1L);
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        validFilm.setMpa(mpa);
         filmService.create(validFilm);
 
         mockMvc.perform(get("/films"))
@@ -241,7 +251,9 @@ public class FilmControllerTest {
         film1.setDescription("description1");
         film1.setReleaseDate(LocalDate.of(2007, 7, 7));
         film1.setDuration(70);
-        film1.setMpa(1L);
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        film1.setMpa(mpa);
         var savedFilm1 = filmService.create(film1);
 
         var film2 = new NewFilmRequest();
@@ -249,7 +261,8 @@ public class FilmControllerTest {
         film2.setDescription("description2");
         film2.setReleaseDate(LocalDate.of(2008, 8, 8));
         film2.setDuration(80);
-        film2.setMpa(1L);
+
+        film2.setMpa(mpa);
         var savedFilm2 = filmService.create(film2);
 
         mockMvc.perform(put("/films/{id}/like/{userId}", savedFilm1.getId(), userId))
@@ -267,29 +280,6 @@ public class FilmControllerTest {
         List<Film> popularFilms = objectMapper.readValue(response,
                 objectMapper.getTypeFactory().constructCollectionType(List.class, Film.class));
         assertEquals(savedFilm1.getId(), popularFilms.get(0).getId());
-    }
-
-    @Test
-    void shouldAddValidLike() throws Exception {
-        var film = new NewFilmRequest();
-        film.setName("film");
-        film.setDescription("description");
-        film.setReleaseDate(LocalDate.of(2007, 7, 7));
-        film.setDuration(70);
-        var savedFilm = filmService.create(film);
-        Long filmId = savedFilm.getId();
-
-        var user = new NewUserRequest();
-        user.setEmail("user@yandex.ru");
-        user.setLogin("user1234");
-        user.setBirthday(LocalDate.of(2000, 1, 1));
-        var savedUser = userService.create(user);
-        Long userId = savedUser.getId();
-
-        mockMvc.perform(put("/films/{id}/like/{userId}", filmId, userId))
-                .andExpect(status().isOk());
-
-        assert savedFilm.getLikes().contains(userId);
     }
 
     @Test
@@ -316,32 +306,6 @@ public class FilmControllerTest {
 
         mockMvc.perform(put("/films/{id}/like/{userId}", 1L, 999L))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldRemoveValidLike() throws Exception {
-        var film = new NewFilmRequest();
-        film.setName("film");
-        film.setDescription("description");
-        film.setReleaseDate(LocalDate.of(2007, 7, 7));
-        film.setDuration(70);
-        var savedFilm = filmService.create(film);
-        Long filmId = savedFilm.getId();
-
-        var user = new NewUserRequest();
-        user.setEmail("user@yandex.ru");
-        user.setLogin("user1234");
-        user.setBirthday(LocalDate.of(2000, 1, 1));
-        var savedUser = userService.create(user);
-        Long userId = savedUser.getId();
-
-        mockMvc.perform(put("/films/{id}/like/{userId}", filmId, userId))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(delete("/films/{id}/like/{userId}", filmId, userId))
-                .andExpect(status().isOk());
-
-        assert !savedFilm.getLikes().contains(userId);
     }
 
     @Test

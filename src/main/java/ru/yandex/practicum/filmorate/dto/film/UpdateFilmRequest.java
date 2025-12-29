@@ -25,7 +25,7 @@ public class UpdateFilmRequest {
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;
 
-    private Set<GenreDto> genreIds = new HashSet<>();
+    private Set<GenreDto> genres = new HashSet<>();
 
     private RatingDto mpa;
 
@@ -46,10 +46,10 @@ public class UpdateFilmRequest {
     }
 
     public boolean hasGenres() {
-        return !(genreIds == null);
+        return !(genres == null);
     }
 
     public boolean hasRating() {
-        return !(mpa == null && mpa.getId() != null);
+        return !(mpa == null || mpa.getId() == null);
     }
 }
