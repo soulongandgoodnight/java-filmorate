@@ -94,33 +94,6 @@ public class LikeRepositoryApplicationTests {
         assertThat(likesForSecondFilm.size()).isEqualTo(likesForSecondFilmCount);
     }
 
-    @Test
-    public void testGetMostLikedFilms() {
-        createEnoughFilms(10);
-        createEnoughUsers(100);
-        var mostPopularFilmLikesCount = 70;
-        var secondPopularFilmLikesCount = 48;
-        var thirdPopularFilmLikesCount = 22;
-        var defaultLikesCount = 8;
-
-        var mostPopularFilm = films.get(0);
-        var secondPopularFilm = films.get(1);
-        var thirdPopularFilm = films.get(2);
-
-        setLikesForFilm(mostPopularFilm, mostPopularFilmLikesCount);
-        setLikesForFilm(secondPopularFilm, secondPopularFilmLikesCount);
-        setLikesForFilm(thirdPopularFilm, thirdPopularFilmLikesCount);
-
-        for (int i = 3; i < films.size(); i++) {
-            setLikesForFilm(films.get(i), defaultLikesCount);
-        }
-
-        var mostLikedFilms = likeRepository.getMostLikedFilms(4);
-        assertThat(mostLikedFilms.size()).isEqualTo(4);
-        assertThat(mostLikedFilms.get(0)).isEqualTo(mostPopularFilm.getId());
-        assertThat(mostLikedFilms.get(1)).isEqualTo(secondPopularFilm.getId());
-        assertThat(mostLikedFilms.get(2)).isEqualTo(thirdPopularFilm.getId());
-    }
 
     private void createEnoughFilms(int filmsCount) {
         var filmsToCreateCount = filmsCount - films.size();

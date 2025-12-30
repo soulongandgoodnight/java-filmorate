@@ -73,17 +73,9 @@ public class FilmService {
             count = defaultCount;
         }
 
-        var mostLikedFilms = likeRepository.getMostLikedFilms(count);
-        var result = new ArrayList<FilmDto>();
-
-        for (var filmId : mostLikedFilms) {
-            var film = filmRepository.getById(filmId).get();
-            var filmGenres = genreRepository.findByFilmId(filmId);
-            film.setGenres(new HashSet<>(filmGenres));
-            result.add(mapper.mapToDto(film));
-        }
-
-        return result;
+        var mostLikedFilms = filmRepository.getMostLikedFilms(count);
+        genreRepository.load(mostLikedFilms);
+        return mostLikedFilms.stream().map(mapper::mapToDto).toList();
     }
 
     public FilmDto create(NewFilmRequest newFilmRequest) {

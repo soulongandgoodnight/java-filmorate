@@ -4,12 +4,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Component
@@ -37,6 +37,9 @@ public class GenreRepository extends BaseRepository<Genre> {
             "DELETE FROM PUBLIC.FILM_GENRES " +
                     "WHERE FILM_ID = ? AND GENRE_ID = ?;";
 
+    private static final String GET_GENRES_FOR_FILMS_QUERY_TEMPLATE =
+            "select * from GENRES g, FILM_GENRES fg where fg.GENRE_ID = g.ID AND fg.FILM_ID in (%s)";
+
     public GenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
     }
@@ -59,5 +62,16 @@ public class GenreRepository extends BaseRepository<Genre> {
 
     public void deleteGenreForFilm(long filmId, long genreId) {
         jdbc.update(DELETE_GENRE_FOR_FILM_QUERY, filmId, genreId);
+    }
+
+    public void load(List<Film> films) {
+        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, f -> f));
+        var ids = films.stream().map(Film::getId).toArray();
+        var inSql = String.join(",", Collections.nCopies(ids.length, "?"));
+        var sql = String.format(GET_GENRES_FOR_FILMS_QUERY_TEMPLATE, inSql);
+        jdbc.query(sql, (rs) -> {
+            var film = filmById.get(rs.getLong("FILM_ID"));
+            film.getGenres().add(mapper.mapRow(rs, 0));
+        }, ids);
     }
 }
