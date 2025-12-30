@@ -69,12 +69,14 @@ public class FilmControllerTest {
 
     @Test
     void shouldCreateFilmWithValidFields() throws Exception {
-        Film validFilm = new Film();
+        var validFilm = new NewFilmRequest();
         validFilm.setName("film");
         validFilm.setDescription("description");
         validFilm.setReleaseDate(LocalDate.of(2007, 7, 7));
         validFilm.setDuration(70);
-
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        validFilm.setMpa(mpa);
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
@@ -304,6 +306,9 @@ public class FilmControllerTest {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2007, 7, 7));
         film.setDuration(70);
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        film.setMpa(mpa);
         filmService.create(film);
 
         mockMvc.perform(put("/films/{id}/like/{userId}", 1L, 999L))
@@ -329,6 +334,9 @@ public class FilmControllerTest {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2007, 7, 7));
         film.setDuration(70);
+        var mpa = new RatingDto();
+        mpa.setId(1L);
+        film.setMpa(mpa);
         filmService.create(film);
 
         mockMvc.perform(delete("/films/{id}/like/{userId}", 1L, 999L))

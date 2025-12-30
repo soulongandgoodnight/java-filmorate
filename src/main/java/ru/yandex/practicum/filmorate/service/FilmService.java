@@ -5,15 +5,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.GenreDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.film.FilmRepository;
 import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
+import ru.yandex.practicum.filmorate.storage.rating.RatingRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.*;
@@ -27,6 +31,7 @@ public class FilmService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final GenreRepository genreRepository;
+    private final RatingRepository ratingRepository;
     private final FilmMapper mapper;
 
     @Value("${popular.default-count:10}")
@@ -79,7 +84,9 @@ public class FilmService {
     }
 
     public FilmDto create(NewFilmRequest newFilmRequest) {
-        var film = mapper.mapToFilm(newFilmRequest);
+        var rating = checkAngGetRating(newFilmRequest.getMpa());
+        var genres = getExistingGenres(newFilmRequest.getGenres());
+        var film = mapper.mapToFilm(newFilmRequest, rating, genres);
         var result = filmRepository.create(film);
         setGenresForFilm(film, Set.of(), film.getGenres());
         return mapper.mapToDto(result);
@@ -91,10 +98,11 @@ public class FilmService {
             throw new NotFoundException("Film id " + updateFilmRequest.getId() + " not found");
         }
 
+        var rating = checkAngGetRating(updateFilmRequest.getMpa());
+        var newGenres = getExistingGenres(updateFilmRequest.getGenres());
         var film = filmOptional.get();
         var oldGenres = film.getGenres();
-        mapper.updateFilmFields(film, updateFilmRequest);
-        var newGenres = film.getGenres();
+        mapper.updateFilmFields(film, updateFilmRequest, rating, newGenres);
         var result = filmRepository.update(film);
         setGenresForFilm(result, oldGenres, newGenres);
         return mapper.mapToDto(result);
@@ -130,5 +138,34 @@ public class FilmService {
         for (var genreToDelete : genresToDelete) {
             genreRepository.deleteGenreForFilm(film.getId(), genreToDelete.getId());
         }
+    }
+
+    private Rating checkAngGetRating(RatingDto ratingDto) {
+        if (ratingDto == null) {
+            return null;
+        }
+
+        var rating = ratingRepository.findById(ratingDto.getId());
+        if (rating.isEmpty()) {
+            throw new NotFoundException("Рейтинг, указанный в запросе, отсутствует");
+        }
+
+        return rating.get();
+    }
+
+    private HashSet<Genre> getExistingGenres(Collection<GenreDto> genreDtos) {
+        var genres = genreRepository.findAll().stream()
+                .collect(Collectors.toMap(Genre::getId, genre -> genre, (a, b) -> b, HashMap::new));
+
+        var filmGenres = new HashSet<Genre>();
+        for (var genreDto : genreDtos) {
+            if (!genres.containsKey(genreDto.getId())) {
+                throw new NotFoundException("В запросе указан отсутствующий жанр. id: '" + genreDto.getId() + "'");
+            }
+
+            filmGenres.add(genres.get(genreDto.getId()));
+        }
+
+        return filmGenres;
     }
 }

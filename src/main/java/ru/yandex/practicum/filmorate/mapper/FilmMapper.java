@@ -7,26 +7,24 @@ import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.GenreDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreRepository;
-import ru.yandex.practicum.filmorate.storage.rating.RatingRepository;
+import ru.yandex.practicum.filmorate.model.Rating;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public final class FilmMapper {
-    private final RatingRepository ratingRepository;
-    private final GenreRepository genreRepository;
     private final RatingMapper ratingMapper;
 
-    public Film mapToFilm(NewFilmRequest request) {
+    public Film mapToFilm(NewFilmRequest request, Rating rating, Set<Genre> genres) {
         var film = new Film();
         film.setName(request.getName());
         film.setDescription(request.getDescription());
@@ -37,22 +35,12 @@ public final class FilmMapper {
 
         film.setReleaseDate(request.getReleaseDate());
         film.setDuration(request.getDuration());
-        if (request.hasRating()) {
-            var rating = ratingRepository.findById(request.getMpa().getId());
-            if (rating.isEmpty()) {
-                throw new NotFoundException("Рейтинг, указанный в запросе, отсутствует");
-            }
-
-            film.setRating(rating.get());
-        }
-
-        var genres = getExistingGenres(request.getGenres());
+        film.setRating(rating);
         film.setGenres(genres);
-
         return film;
     }
 
-    public Film updateFilmFields(Film film, UpdateFilmRequest dto) {
+    public Film updateFilmFields(Film film, UpdateFilmRequest dto, Rating rating, Set<Genre> genres) {
         if (dto.hasName()) {
             film.setName(dto.getName());
         }
@@ -73,17 +61,12 @@ public final class FilmMapper {
             film.setDuration(dto.getDuration());
         }
 
-        if (dto.hasGenres()) {
-            var genres = getExistingGenres(dto.getGenres());
+        if (genres != null && !genres.isEmpty()) {
             film.setGenres(genres);
         }
 
-        if (dto.hasRating()) {
-            var ratingOptional = ratingRepository.findById(dto.getMpa().getId());
-            if (ratingOptional.isEmpty()) {
-                throw new ValidationException("Рейтинг, указанный в запросе, отсутствует");
-            }
-            film.setRating(ratingOptional.get());
+        if (rating != null) {
+            film.setRating(rating);
         }
 
         return film;
@@ -111,21 +94,5 @@ public final class FilmMapper {
         dto.setId(genre.getId());
         dto.setName(genre.getName());
         return dto;
-    }
-
-    private HashSet<Genre> getExistingGenres(Collection<GenreDto> genreDtos) {
-        var genres = genreRepository.findAll().stream()
-                .collect(Collectors.toMap(Genre::getId, genre -> genre, (a, b) -> b, HashMap::new));
-
-        var filmGenres = new HashSet<Genre>();
-        for (var genreDto : genreDtos) {
-            if (!genres.containsKey(genreDto.getId())) {
-                throw new NotFoundException("В запросе указан отсутствующий жанр. id: '" + genreDto.getId() + "'");
-            }
-
-            filmGenres.add(genres.get(genreDto.getId()));
-        }
-
-        return filmGenres;
     }
 }
