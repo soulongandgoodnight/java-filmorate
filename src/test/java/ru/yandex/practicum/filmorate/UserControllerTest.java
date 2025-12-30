@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
+import ru.yandex.practicum.filmorate.dto.user.UserRelationDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
@@ -248,29 +249,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$[0].id").exists());
     }
 
-//    @Test
-//    void shouldAddValidFriend() throws Exception {
-//        var user1 = new NewUserRequest();
-//        user1.setEmail("user1@yandex.ru");
-//        user1.setLogin("user1234");
-//        user1.setName("Lexa");
-//        user1.setBirthday(LocalDate.of(2000, 1, 1));
-//        var savedUser1 = userService.create(user1);
-//
-//        var user2 = new NewUserRequest();
-//        user2.setEmail("user2@yandex.ru");
-//        user2.setLogin("user5678");
-//        user2.setName("Lepexa");
-//        user2.setBirthday(LocalDate.of(1999, 12, 31));
-//        var savedUser2 = userService.create(user2);
-//
-//        mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
-//                .andExpect(status().isOk());
-//
-//        assert savedUser1.getRelations().containsKey(savedUser2.getId());
-//        assert savedUser2.getRelations().containsKey(savedUser1.getId());
-//    }
-
     @Test
     void whenAddFriend_shouldFailOnUnknownId() throws Exception {
         var user2 = new NewUserRequest();
@@ -320,31 +298,31 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-//    @Test
-//    void shouldRemoveFriend() throws Exception {
-//        var user1 = new NewUserRequest();
-//        user1.setEmail("user1@yandex.ru");
-//        user1.setLogin("user1234");
-//        user1.setName("Lexa");
-//        user1.setBirthday(LocalDate.of(2000, 1, 1));
-//        var savedUser1 = userService.create(user1);
-//
-//        var user2 = new NewUserRequest();
-//        user2.setEmail("user2@yandex.ru");
-//        user2.setLogin("user5678");
-//        user2.setName("Lepexa");
-//        user2.setBirthday(LocalDate.of(1999, 12, 31));
-//        var savedUser2 = userService.create(user2);
-//
-//        mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
-//                .andExpect(status().isOk());
-//
-//        mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
-//                .andExpect(status().isOk());
-//
-//        assert !userService.getById(savedUser1.getId()).getRelations().containsKey(savedUser2.getId());
-//        assert !userService.getById(savedUser2.getId()).getRelations().containsKey(savedUser1.getId());
-//    }
+    @Test
+    void shouldRemoveFriend() throws Exception {
+        var user1 = new NewUserRequest();
+        user1.setEmail("user1@yandex.ru");
+        user1.setLogin("user1234");
+        user1.setName("Lexa");
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser1 = userService.create(user1);
+
+        var user2 = new NewUserRequest();
+        user2.setEmail("user2@yandex.ru");
+        user2.setLogin("user5678");
+        user2.setName("Lepexa");
+        user2.setBirthday(LocalDate.of(1999, 12, 31));
+        var savedUser2 = userService.create(user2);
+
+        mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
+                .andExpect(status().isOk());
+
+        assert !userService.getById(savedUser1.getId()).getRelations().stream().map(UserRelationDto::getFollowedUserId).toList().contains(savedUser2.getId());
+        assert !userService.getById(savedUser2.getId()).getRelations().stream().map(UserRelationDto::getFollowedUserId).toList().contains(savedUser1.getId());
+    }
 
     @Test
     void whenRemoveFriend_shouldPassOnNotFriend() throws Exception {

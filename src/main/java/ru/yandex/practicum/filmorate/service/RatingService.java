@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -13,7 +12,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class RatingService {
     private final RatingRepository ratingRepository;
     private final RatingMapper mapper;
