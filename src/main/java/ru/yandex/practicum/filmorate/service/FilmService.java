@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -20,6 +21,8 @@ import ru.yandex.practicum.filmorate.storage.like.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.rating.RatingRepository;
 import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,6 +89,7 @@ public class FilmService {
     public FilmDto create(NewFilmRequest newFilmRequest) {
         var rating = checkAngGetRating(newFilmRequest.getMpa());
         var genres = getExistingGenres(newFilmRequest.getGenres());
+        validateReleaseDate(newFilmRequest.getReleaseDate());
         var film = mapper.mapToFilm(newFilmRequest, rating, genres);
         var result = filmRepository.create(film);
         setGenresForFilm(film, Set.of(), film.getGenres());
@@ -102,6 +106,7 @@ public class FilmService {
         var newGenres = getExistingGenres(updateFilmRequest.getGenres());
         var film = filmOptional.get();
         var oldGenres = film.getGenres();
+        validateReleaseDate(updateFilmRequest.getReleaseDate());
         mapper.updateFilmFields(film, updateFilmRequest, rating, newGenres);
         var result = filmRepository.update(film);
         setGenresForFilm(result, oldGenres, newGenres);
@@ -121,6 +126,13 @@ public class FilmService {
         var films = filmRepository.findAll();
         return films.stream().sorted(Comparator.comparing(Film::getId))
                 .map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private void validateReleaseDate(LocalDate releaseDate) {
+        LocalDate minReleaseDate = LocalDate.of(1895, Month.DECEMBER, 28);
+        if (releaseDate != null && releaseDate.isBefore(minReleaseDate)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
     }
 
     private void setGenresForFilm(Film film, Set<Genre> oldGenres, Set<Genre> newGenres) {

@@ -7,13 +7,10 @@ import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.GenreDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Set;
@@ -28,11 +25,6 @@ public final class FilmMapper {
         var film = new Film();
         film.setName(request.getName());
         film.setDescription(request.getDescription());
-        LocalDate minReleaseDate = LocalDate.of(1895, Month.DECEMBER, 28);
-        if (request.getReleaseDate() != null && request.getReleaseDate().isBefore(minReleaseDate)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-        }
-
         film.setReleaseDate(request.getReleaseDate());
         film.setDuration(request.getDuration());
         film.setRating(rating);
@@ -50,10 +42,6 @@ public final class FilmMapper {
         }
 
         if (dto.hasReleaseDate()) {
-            LocalDate minReleaseDate = LocalDate.of(1895, Month.DECEMBER, 28);
-            if (dto.getReleaseDate().isBefore(minReleaseDate)) {
-                throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-            }
             film.setReleaseDate(dto.getReleaseDate());
         }
 
