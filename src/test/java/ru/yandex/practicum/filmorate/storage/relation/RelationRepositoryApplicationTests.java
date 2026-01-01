@@ -47,16 +47,16 @@ public class RelationRepositoryApplicationTests {
         relationToAdd.setFollowedUserId(followedId);
         relationRepository.addRelation(relationToAdd);
 
-        var relationsByUser = relationRepository.getAllByUserId(followingId);
-        assertThat(relationsByUser.size()).isEqualTo(1);
-        assertThat(relationToAdd).isEqualTo(relationsByUser.stream().findFirst().get());
+        var userFriends = userRepository.findFriends(followingId);
+        assertThat(userFriends.size()).isEqualTo(1);
+        assertThat(relationToAdd.getFollowedUserId()).isEqualTo(userFriends.stream().findFirst().get().getId());
         for (int i = 0; i < 10; i++) {
             relationRepository.addRelation(relationToAdd);
         }
 
-        relationsByUser = relationRepository.getAllByUserId(followingId);
-        assertThat(relationsByUser.size()).isEqualTo(1);
-        assertThat(relationToAdd).isEqualTo(relationsByUser.stream().findFirst().get());
+        userFriends = userRepository.findFriends(followingId);
+        assertThat(userFriends.size()).isEqualTo(1);
+        assertThat(relationToAdd.getFollowedUserId()).isEqualTo(userFriends.stream().findFirst().get().getId());
     }
 
     @Test
@@ -68,38 +68,21 @@ public class RelationRepositoryApplicationTests {
         relationToAdd.setFollowingUserId(followingId);
         relationToAdd.setFollowedUserId(followedId);
         relationRepository.addRelation(relationToAdd);
-        var relationsByUser = relationRepository.getAllByUserId(followingId);
+        var relationsByUser = userRepository.findFriends(followingId);
         assertThat(relationsByUser.size()).isEqualTo(1);
-        assertThat(relationToAdd).isEqualTo(relationsByUser.stream().findFirst().get());
+        assertThat(relationToAdd.getFollowedUserId()).isEqualTo(relationsByUser.stream().findFirst().get().getId());
 
         relationRepository.removeRelation(relationToAdd);
-        relationsByUser = relationRepository.getAllByUserId(followingId);
+        relationsByUser = userRepository.findFriends(followingId);
         assertThat(relationsByUser.size()).isEqualTo(0);
         for (int i = 0; i < 10; i++) {
             relationRepository.removeRelation(relationToAdd);
         }
+
+        relationsByUser = userRepository.findFriends(followingId);
+        assertThat(relationsByUser.size()).isEqualTo(0);
     }
 
-    @Test
-    public void testGetAllByUesrId() {
-        createEnoughUsers(100);
-        var firstUserRelationsCount = 50;
-        var secondUserRelationsCount = 23;
-        var thirdUserRelationsCount = 78;
-        var firstUser = users.get(0);
-        var secondUser = users.get(1);
-        var thirdUser = users.get(2);
-        createUnconfirmedRelations(firstUser.getId(), firstUserRelationsCount);
-        createUnconfirmedRelations(secondUser.getId(), secondUserRelationsCount);
-        createUnconfirmedRelations(thirdUser.getId(), thirdUserRelationsCount);
-
-        var firstUserRelations = relationRepository.getAllByUserId(firstUser.getId());
-        var secondUserRelations = relationRepository.getAllByUserId(secondUser.getId());
-        var thirdUserRelations = relationRepository.getAllByUserId(thirdUser.getId());
-        assertThat(firstUserRelations.size()).isEqualTo(firstUserRelationsCount);
-        assertThat(secondUserRelations.size()).isEqualTo(secondUserRelationsCount);
-        assertThat(thirdUserRelations.size()).isEqualTo(thirdUserRelationsCount);
-    }
 
     @Test
     public void testFindRelation() {

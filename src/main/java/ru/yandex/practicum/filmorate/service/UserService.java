@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,24 +65,13 @@ public class UserService {
         if (userOptional.isEmpty()) {
             throw new NotFoundException("User with id " + userId + " not found");
         }
-        var relations = relationRepository.getAllByUserId(userId);
-        var confirmedFriends = getFriendIdsSet(relations);
-        var result = userRepository.getByIds(confirmedFriends);
-        return result.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
+        var friends = userRepository.findFriends(userId);
+        return friends.stream().map(mapper::mapToDto).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public Collection<UserDto> getCommonFriends(Long userId, Long otherId) {
-        var userRelations = relationRepository.getAllByUserId(userId);
-        var otherPersonRelations = relationRepository.getAllByUserId(otherId);
-        var userFriends = getFriendIdsSet(userRelations);
-        var otherPersonFriends = getFriendIdsSet(otherPersonRelations);
-
-        userFriends.retainAll(otherPersonFriends);
-        return userFriends.stream().map(this::getById).collect(Collectors.toList());
-    }
-
-    private Set<Long> getFriendIdsSet(Collection<Relation> relations) {
-        return relations.stream().map(Relation::getFollowedUserId).collect(Collectors.toSet());
+        var commonFriends = userRepository.findCommonFriends(userId, otherId);
+        return commonFriends.stream().map(mapper::mapToDto).collect(Collectors.toList());
     }
 
     public UserDto create(NewUserRequest newUserRequest) {

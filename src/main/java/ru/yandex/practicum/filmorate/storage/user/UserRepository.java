@@ -46,6 +46,15 @@ public class UserRepository extends BaseRepository<User> {
             "SELECT ID, EMAIL, LOGIN, NAME, BIRTHDAY " +
                     "FROM PUBLIC.USERS";
 
+    private static final String FIND_FRIENDS_QUERY =
+            "SELECT * FROM USERS, RELATIONS " +
+                    "WHERE USERS.ID = RELATIONS.FOLLOWED_USER_ID AND RELATIONS.FOLLOWING_USER_ID = ?";
+
+    private static final String FIND_COMMON_FRIENDS_QUERY =
+            "SELECT * FROM USERS u, RELATIONS f, RELATIONS o " +
+                    "where u.ID = f.FOLLOWED_USER_ID AND u.ID = o.FOLLOWED_USER_ID " +
+                    "AND f.FOLLOWING_USER_ID = ? AND o.FOLLOWING_USER_ID = ?";
+
     public User create(User user) {
         var id = insert(CREATE_QUERY, user.getEmail(), user.getName(), user.getLogin(), user.getBirthday());
 
@@ -71,6 +80,14 @@ public class UserRepository extends BaseRepository<User> {
         var inSql = String.join(",", Collections.nCopies(idsArray.length, "?"));
         var sql = String.format(GET_BY_MANY_IDS_QUERY, inSql);
         return findMany(sql, idsArray);
+    }
+
+    public Collection<User> findFriends(long userId) {
+        return findMany(FIND_FRIENDS_QUERY, userId);
+    }
+
+    public Collection<User> findCommonFriends(long userId, long friendId) {
+        return findMany(FIND_COMMON_FRIENDS_QUERY, userId, friendId);
     }
 
     public Collection<User> findAll() {
