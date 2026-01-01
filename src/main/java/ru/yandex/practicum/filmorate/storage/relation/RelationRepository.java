@@ -16,11 +16,8 @@ public class RelationRepository extends BaseRepository<Relation> {
     }
 
     private static final String ADD_RELATION_QUERY =
-            "MERGE INTO PUBLIC.RELATIONS AS T " +
-                    "USING (VALUES(?, ?)) AS S (FOLLOWING_USER_ID, FOLLOWED_USER_ID) " +
-                    "ON T.FOLLOWING_USER_ID = S.FOLLOWING_USER_ID AND T.FOLLOWED_USER_ID = S.FOLLOWED_USER_ID " +
-                    "WHEN NOT MATCHED THEN " +
-                    "INSERT VALUES(S.FOLLOWING_USER_ID, S.FOLLOWED_USER_ID); ";
+            "MERGE INTO PUBLIC.RELATIONS (FOLLOWING_USER_ID, FOLLOWED_USER_ID) " +
+                    "VALUES(?, ?) ";
 
     private static final String REMOVE_RELATION_QUERY =
             "DELETE FROM PUBLIC.RELATIONS " +
