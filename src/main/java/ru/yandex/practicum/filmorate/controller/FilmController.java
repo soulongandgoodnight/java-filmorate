@@ -3,8 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Marker;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -17,23 +18,24 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping
-    public Collection<Film> findAll() {
+    public Collection<FilmDto> findAll() {
         return filmService.findAll();
     }
 
     @PostMapping
-    public Film create(@Validated(Marker.OnCreate.class) @RequestBody Film film) {
+    public FilmDto create(@Validated @RequestBody NewFilmRequest film) {
+
         return filmService.create(film);
     }
 
     @PutMapping
-    @Validated(Marker.OnUpdate.class)
-    public Film update(@Validated(Marker.OnUpdate.class) @RequestBody Film film) {
+    public FilmDto update(@Validated @RequestBody UpdateFilmRequest film) {
+
         return filmService.update(film);
     }
 
     @GetMapping("/{id}")
-    public Film getById(@PathVariable Long id) {
+    public FilmDto getById(@PathVariable Long id) {
         return filmService.getById(id);
     }
 
@@ -48,7 +50,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "${popular.default-count}") Integer count) {
+    public Collection<FilmDto> getPopular(@RequestParam(defaultValue = "${popular.default-count}") Integer count) {
         return filmService.getPopular(count);
     }
 }

@@ -1,20 +1,18 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.film;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.dto.rating.RatingDto;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class Film {
-    @NotNull
-    private Long id;
-
+public class NewFilmRequest {
     @NotBlank(message = "Название не может быть пустым")
     private String name;
 
@@ -27,10 +25,11 @@ public class Film {
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;
 
-    private Set<Long> likes = new HashSet<>();
+    private Set<GenreDto> genres = new HashSet<>();
 
-    private Set<Genre> genres = new HashSet<>();
+    private RatingDto mpa;
 
-    @NotNull(message = "Рейтинг MPA обязателен")
-    private Rating rating;
+    public boolean hasRating() {
+        return mpa != null;
+    }
 }

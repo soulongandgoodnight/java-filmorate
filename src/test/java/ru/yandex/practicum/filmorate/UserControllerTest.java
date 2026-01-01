@@ -4,24 +4,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UserDto;
+import ru.yandex.practicum.filmorate.dto.user.UserRelationDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
 @AutoConfigureMockMvc
 public class UserControllerTest {
 
@@ -35,13 +38,13 @@ public class UserControllerTest {
     private UserService userService;
 
     @Autowired
-    private UserStorage userStorage;
+    private UserRepository userStorage;
 
     @BeforeEach
     void clearUsers() {
         List<Long> userIds = userService.findAll().stream()
-                .map(User::getId)
-                .collect(Collectors.toList());
+                .map(UserDto::getId)
+                .toList();
         userIds.forEach(userStorage::delete);
     }
 
@@ -51,7 +54,7 @@ public class UserControllerTest {
         validUser.setEmail("user@yandex.ru");
         validUser.setLogin("user1234");
         validUser.setName("Lexa");
-        validUser.setBirthday(LocalDate.of(2000,1,1));
+        validUser.setBirthday(LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -141,7 +144,7 @@ public class UserControllerTest {
         validUser.setEmail("user@yandex.ru");
         validUser.setLogin("user1234");
         validUser.setName("");
-        validUser.setBirthday(LocalDate.of(2000,1,1));
+        validUser.setBirthday(LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -156,7 +159,7 @@ public class UserControllerTest {
         validUser.setEmail("user@yandex.ru");
         validUser.setLogin("user1234");
         validUser.setName(null);
-        validUser.setBirthday(LocalDate.of(2000,1,1));
+        validUser.setBirthday(LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -189,12 +192,12 @@ public class UserControllerTest {
 
     @Test
     void shouldUpdateUserWithValidFields() throws Exception {
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setName("Lexa");
-        user.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser = userService.create(user);
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser = userService.create(user);
         Long id = savedUser.getId();
 
         User updateUser = new User();
@@ -232,11 +235,11 @@ public class UserControllerTest {
 
     @Test
     void shouldReturnAllUsers() throws Exception {
-        User user = new User();
+        var user = new NewUserRequest();
         user.setEmail("user@yandex.ru");
         user.setLogin("user1234");
         user.setName("Lexa");
-        user.setBirthday(LocalDate.of(2000,1,1));
+        user.setBirthday(LocalDate.of(2000, 1, 1));
         userService.create(user);
 
         mockMvc.perform(get("/users"))
@@ -247,31 +250,8 @@ public class UserControllerTest {
     }
 
     @Test
-    void shouldAddValidFriend() throws Exception {
-        User user1 = new User();
-        user1.setEmail("user1@yandex.ru");
-        user1.setLogin("user1234");
-        user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser1 = userService.create(user1);
-
-        User user2 = new User();
-        user2.setEmail("user2@yandex.ru");
-        user2.setLogin("user5678");
-        user2.setName("Lepexa");
-        user2.setBirthday(LocalDate.of(1999, 12, 31));
-        User savedUser2 = userService.create(user2);
-
-        mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
-                .andExpect(status().isOk());
-
-        assert savedUser1.getFriends().contains(savedUser2.getId());
-        assert savedUser2.getFriends().contains(savedUser1.getId());
-    }
-
-    @Test
     void whenAddFriend_shouldFailOnUnknownId() throws Exception {
-        User user2 = new User();
+        var user2 = new NewUserRequest();
         user2.setEmail("user2@yandex.ru");
         user2.setLogin("user5678");
         user2.setName("Lepexa");
@@ -284,24 +264,24 @@ public class UserControllerTest {
 
     @Test
     void shouldReturnFriend() throws Exception {
-        User user1 = new User();
+        var user1 = new NewUserRequest();
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser1 = userService.create(user1);
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser1 = userService.create(user1);
 
         mockMvc.perform(get("/users/{id}/friends", savedUser1.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(0));
 
-        User user2 = new User();
+        var user2 = new NewUserRequest();
         user2.setEmail("user2@yandex.ru");
         user2.setLogin("user5678");
         user2.setName("Lepexa");
         user2.setBirthday(LocalDate.of(1999, 12, 31));
-        User savedUser2 = userService.create(user2);
+        var savedUser2 = userService.create(user2);
 
         mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
@@ -320,19 +300,19 @@ public class UserControllerTest {
 
     @Test
     void shouldRemoveFriend() throws Exception {
-        User user1 = new User();
+        var user1 = new NewUserRequest();
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser1 = userService.create(user1);
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser1 = userService.create(user1);
 
-        User user2 = new User();
+        var user2 = new NewUserRequest();
         user2.setEmail("user2@yandex.ru");
         user2.setLogin("user5678");
         user2.setName("Lepexa");
         user2.setBirthday(LocalDate.of(1999, 12, 31));
-        User savedUser2 = userService.create(user2);
+        var savedUser2 = userService.create(user2);
 
         mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
@@ -340,36 +320,36 @@ public class UserControllerTest {
         mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
 
-        assert !userService.getById(savedUser1.getId()).getFriends().contains(savedUser2.getId());
-        assert !userService.getById(savedUser2.getId()).getFriends().contains(savedUser1.getId());
+        assert !userService.getById(savedUser1.getId()).getRelations().stream().map(UserRelationDto::getFollowedUserId).toList().contains(savedUser2.getId());
+        assert !userService.getById(savedUser2.getId()).getRelations().stream().map(UserRelationDto::getFollowedUserId).toList().contains(savedUser1.getId());
     }
 
     @Test
     void whenRemoveFriend_shouldPassOnNotFriend() throws Exception {
-        User user1 = new User();
+        var user1 = new NewUserRequest();
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser1 = userService.create(user1);
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser1 = userService.create(user1);
 
-        User user2 = new User();
+        var user2 = new NewUserRequest();
         user2.setEmail("user2@yandex.ru");
         user2.setLogin("user5678");
         user2.setName("Lepexa");
         user2.setBirthday(LocalDate.of(1999, 12, 31));
-        User savedUser2 = userService.create(user2);
+        var savedUser2 = userService.create(user2);
 
         mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser2.getId()))
                 .andExpect(status().isOk());
 
-        assert userService.getById(savedUser1.getId()).getFriends().isEmpty();
-        assert userService.getById(savedUser2.getId()).getFriends().isEmpty();
+        assert userService.getById(savedUser1.getId()).getRelations().isEmpty();
+        assert userService.getById(savedUser2.getId()).getRelations().isEmpty();
     }
 
     @Test
     void whenRemoveFriend_shouldFailOnUnknownId() throws Exception {
-        User user2 = new User();
+        var user2 = new NewUserRequest();
         user2.setEmail("user2@yandex.ru");
         user2.setLogin("user5678");
         user2.setName("Lepexa");
@@ -382,12 +362,12 @@ public class UserControllerTest {
 
     @Test
     void whenRemoveFriend_shouldFailOnUnknownFriendId() throws Exception {
-        User user1 = new User();
+        var user1 = new NewUserRequest();
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser1 = userService.create(user1);
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser1 = userService.create(user1);
 
         mockMvc.perform(delete("/users/{id}/friends/{friendId}", savedUser1.getId(), 999L))
                 .andExpect(status().isNotFound());
@@ -395,26 +375,26 @@ public class UserControllerTest {
 
     @Test
     void shouldReturnCommonFriends() throws Exception {
-        User user1 = new User();
+        var user1 = new NewUserRequest();
         user1.setEmail("user1@yandex.ru");
         user1.setLogin("user1234");
         user1.setName("Lexa");
-        user1.setBirthday(LocalDate.of(2000,1,1));
-        User savedUser1 = userService.create(user1);
+        user1.setBirthday(LocalDate.of(2000, 1, 1));
+        var savedUser1 = userService.create(user1);
 
-        User user2 = new User();
+        var user2 = new NewUserRequest();
         user2.setEmail("user2@yandex.ru");
         user2.setLogin("user5678");
         user2.setName("Lepexa");
         user2.setBirthday(LocalDate.of(1999, 12, 31));
-        User savedUser2 = userService.create(user2);
+        var savedUser2 = userService.create(user2);
 
-        User user3 = new User();
+        var user3 = new NewUserRequest();
         user3.setEmail("user3@yandex.ru");
         user3.setLogin("user9101");
         user3.setName("Kartoxa");
-        user3.setBirthday(LocalDate.of(1989,5,5));
-        User savedUser3 = userService.create(user3);
+        user3.setBirthday(LocalDate.of(1989, 5, 5));
+        var savedUser3 = userService.create(user3);
 
         mockMvc.perform(put("/users/{id}/friends/{friendId}", savedUser1.getId(), savedUser3.getId()))
                 .andExpect(status().isOk());
