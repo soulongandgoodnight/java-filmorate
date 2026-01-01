@@ -6,6 +6,5 @@ import lombok.Data;
 public class Relation {
     private Long followingUserId;
     private Long followedUserId;
-    private Boolean isFriendshipConfirmed;
 }
 

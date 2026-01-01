@@ -63,7 +63,6 @@ public final class UserMapper {
         var relations = user.getRelations().values().stream().map(r -> {
             var result = new UserRelationDto();
             result.setFollowedUserId(r.getFollowedUserId());
-            result.setIsFriendshipConfirmed(r.getIsFriendshipConfirmed());
             return result;
         }).collect(Collectors.toCollection(ArrayList::new));
         dto.setRelations(relations);

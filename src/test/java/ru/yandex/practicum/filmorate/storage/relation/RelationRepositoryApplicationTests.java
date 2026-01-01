@@ -45,7 +45,6 @@ public class RelationRepositoryApplicationTests {
         var relationToAdd = new Relation();
         relationToAdd.setFollowingUserId(followingId);
         relationToAdd.setFollowedUserId(followedId);
-        relationToAdd.setIsFriendshipConfirmed(true);
         relationRepository.addRelation(relationToAdd);
 
         var relationsByUser = relationRepository.getAllByUserId(followingId);
@@ -68,7 +67,6 @@ public class RelationRepositoryApplicationTests {
         var relationToAdd = new Relation();
         relationToAdd.setFollowingUserId(followingId);
         relationToAdd.setFollowedUserId(followedId);
-        relationToAdd.setIsFriendshipConfirmed(true);
         relationRepository.addRelation(relationToAdd);
         var relationsByUser = relationRepository.getAllByUserId(followingId);
         assertThat(relationsByUser.size()).isEqualTo(1);
@@ -80,27 +78,6 @@ public class RelationRepositoryApplicationTests {
         for (int i = 0; i < 10; i++) {
             relationRepository.removeRelation(relationToAdd);
         }
-    }
-
-    @Test
-    public void testAddAndThenUpdateRelation() {
-        var followingId = users.get(0).getId();
-        var followedId = users.get(1).getId();
-
-        var relation = new Relation();
-        relation.setFollowingUserId(followingId);
-        relation.setFollowedUserId(followedId);
-        relation.setIsFriendshipConfirmed(true);
-        relationRepository.addRelation(relation);
-        var relationsByUser = relationRepository.getAllByUserId(followingId);
-        assertThat(relationsByUser.size()).isEqualTo(1);
-        assertThat(relation).isEqualTo(relationsByUser.stream().findFirst().get());
-
-        relation.setIsFriendshipConfirmed(!relation.getIsFriendshipConfirmed());
-        relationRepository.updateRelation(relation);
-        relationsByUser = relationRepository.getAllByUserId(followingId);
-        assertThat(relationsByUser.size()).isEqualTo(1);
-        assertThat(relation).isEqualTo(relationsByUser.stream().findFirst().get());
     }
 
     @Test
@@ -135,7 +112,6 @@ public class RelationRepositoryApplicationTests {
         var relationToFind = new Relation();
         relationToFind.setFollowingUserId(users.get(50).getId());
         relationToFind.setFollowedUserId(users.get(78).getId());
-        relationToFind.setIsFriendshipConfirmed(false);
         relationRepository.addRelation(relationToFind);
         var actualRelation = relationRepository.findRelation(relationToFind.getFollowingUserId(), relationToFind.getFollowedUserId());
         assertThat(actualRelation).isPresent();
@@ -151,7 +127,6 @@ public class RelationRepositoryApplicationTests {
             var relation = new Relation();
             relation.setFollowingUserId(userId);
             relation.setFollowedUserId(followedId);
-            relation.setIsFriendshipConfirmed(false);
             relationRepository.addRelation(relation);
         }
     }

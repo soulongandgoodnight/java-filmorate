@@ -17,36 +17,27 @@ public class RelationRepository extends BaseRepository<Relation> {
 
     private static final String ADD_RELATION_QUERY =
             "MERGE INTO PUBLIC.RELATIONS AS T " +
-                    "USING (VALUES(?, ?, ?)) AS S (FOLLOWING_USER_ID, FOLLOWED_USER_ID, IS_FRIENDSHIP_CONFIRMED) " +
+                    "USING (VALUES(?, ?)) AS S (FOLLOWING_USER_ID, FOLLOWED_USER_ID) " +
                     "ON T.FOLLOWING_USER_ID = S.FOLLOWING_USER_ID AND T.FOLLOWED_USER_ID = S.FOLLOWED_USER_ID " +
                     "WHEN NOT MATCHED THEN " +
-                    "INSERT VALUES(S.FOLLOWING_USER_ID, S.FOLLOWED_USER_ID, S.IS_FRIENDSHIP_CONFIRMED); ";
-
-    private static final String UPDATE_RELATION_QUERY =
-            "UPDATE PUBLIC.RELATIONS " +
-                    "SET IS_FRIENDSHIP_CONFIRMED = ? " +
-                    "WHERE FOLLOWING_USER_ID = ? AND FOLLOWED_USER_ID = ?;";
+                    "INSERT VALUES(S.FOLLOWING_USER_ID, S.FOLLOWED_USER_ID); ";
 
     private static final String REMOVE_RELATION_QUERY =
             "DELETE FROM PUBLIC.RELATIONS " +
                     "WHERE FOLLOWING_USER_ID = ? AND FOLLOWED_USER_ID = ?;";
 
     private static final String GET_ALL_BY_USER_ID_QUERY =
-            "SELECT FOLLOWING_USER_ID, FOLLOWED_USER_ID, IS_FRIENDSHIP_CONFIRMED " +
+            "SELECT FOLLOWING_USER_ID, FOLLOWED_USER_ID " +
                     "FROM PUBLIC.RELATIONS " +
                     "WHERE FOLLOWING_USER_ID = ?;";
 
     private static final String FIND_RELATION_QUERY =
-            "SELECT FOLLOWING_USER_ID, FOLLOWED_USER_ID, IS_FRIENDSHIP_CONFIRMED " +
+            "SELECT FOLLOWING_USER_ID, FOLLOWED_USER_ID " +
                     "FROM PUBLIC.RELATIONS " +
                     "WHERE FOLLOWING_USER_ID = ? AND FOLLOWED_USER_ID = ?;";
 
     public void addRelation(Relation relation) {
-        jdbc.update(ADD_RELATION_QUERY, relation.getFollowingUserId(), relation.getFollowedUserId(), relation.getIsFriendshipConfirmed());
-    }
-
-    public void updateRelation(Relation relation) {
-        jdbc.update(UPDATE_RELATION_QUERY, relation.getIsFriendshipConfirmed(), relation.getFollowingUserId(), relation.getFollowedUserId());
+        jdbc.update(ADD_RELATION_QUERY, relation.getFollowingUserId(), relation.getFollowedUserId());
     }
 
     public void removeRelation(Relation relation) {

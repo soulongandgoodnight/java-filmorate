@@ -36,32 +36,12 @@ public class UserService {
             throw new NotFoundException("Friend with id " + userId + " not found");
         }
         var userRelationOptional = relationRepository.findRelation(userId, friendId);
-        var friendRelationOptional = relationRepository.findRelation(friendId, userId);
 
-        if (userRelationOptional.isEmpty() && friendRelationOptional.isEmpty()) {
+        if (userRelationOptional.isEmpty()) {
             var newRelation = new Relation();
             newRelation.setFollowingUserId(userId);
             newRelation.setFollowedUserId(friendId);
-            newRelation.setIsFriendshipConfirmed(false);
             relationRepository.addRelation(newRelation);
-            return;
-        }
-
-        if (friendRelationOptional.isPresent() && !friendRelationOptional.get().getIsFriendshipConfirmed()) {
-            var friendRelation = friendRelationOptional.get();
-            friendRelation.setIsFriendshipConfirmed(true);
-            relationRepository.updateRelation(friendRelation);
-            if (userRelationOptional.isEmpty()) {
-                var userRelation = new Relation();
-                userRelation.setFollowingUserId(userId);
-                userRelation.setFollowedUserId(friendId);
-                userRelation.setIsFriendshipConfirmed(true);
-                relationRepository.addRelation(userRelation);
-            } else {
-                var userRelation = userRelationOptional.get();
-                userRelation.setIsFriendshipConfirmed(true);
-                relationRepository.updateRelation(userRelation);
-            }
         }
     }
 

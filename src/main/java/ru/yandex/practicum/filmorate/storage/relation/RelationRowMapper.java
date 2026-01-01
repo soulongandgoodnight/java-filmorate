@@ -16,7 +16,6 @@ public class RelationRowMapper implements RowMapper<Relation> {
         var relation = new Relation();
         relation.setFollowingUserId(rs.getLong("FOLLOWING_USER_ID"));
         relation.setFollowedUserId(rs.getLong("FOLLOWED_USER_ID"));
-        relation.setIsFriendshipConfirmed(rs.getBoolean("IS_FRIENDSHIP_CONFIRMED"));
         return relation;
     }
 }
